@@ -1,69 +1,84 @@
 package main
 
 import (
-	"math"
-	"math/rand"
+	"fmt"
+	log "github.com/sirupsen/logrus"
+	"os"
 	"runtime"
 	"strconv"
+	"strings"
 	"time"
 )
 
-var messages = make(chan string)
-var isFinished = make(chan bool)
+type myFormatter struct {
+	log.TextFormatter
+}
+
+func (f *myFormatter) Format(entry *log.Entry) ([]byte, error) {
+	// this whole mess of dealing with ansi color codes is required if you want the colored output otherwise you will lose colors in the log levels
+	var levelColor int
+	switch entry.Level {
+	case log.DebugLevel, log.TraceLevel:
+		levelColor = 31 // gray
+	case log.WarnLevel:
+		levelColor = 33 // yellow
+	case log.ErrorLevel, log.FatalLevel, log.PanicLevel:
+		levelColor = 31 // red
+	default:
+		levelColor = 36 // blue
+	}
+	return []byte(fmt.Sprintf("[%s] - \x1b[%dm%s\x1b[0m - %s\n", entry.Time.Format(f.TimestampFormat), levelColor, strings.ToUpper(entry.Level.String()), entry.Message)), nil
+}
+
+func initLogger() {
+	log.SetFormatter(&myFormatter{log.TextFormatter{
+		FullTimestamp:          true,
+		TimestampFormat:        "2006-01-02 15:04:05",
+		ForceColors:            true,
+		DisableLevelTruncation: true,
+	}})
+	log.SetOutput(os.Stdout)
+	log.SetLevel(log.DebugLevel)
+}
+
+var shouldFinish = make(chan bool)
+var generatedOptions = make(chan int, 100000000)
 
 func main() {
-	//print the number of processors
-	println("Number of processors: " + strconv.Itoa(runtime.NumCPU()))
-	// print available threads
-	println("Number of threads: " + strconv.Itoa(runtime.GOMAXPROCS(0)))
+	initLogger()
+	log.Debug("Number of processors: " + strconv.Itoa(runtime.NumCPU()))
+	log.Debug("Number of threads: " + strconv.Itoa(runtime.GOMAXPROCS(0)))
 
-	go produceMessage()
-	go consumeMessage()
+	initTimeTable()
 
-	<-isFinished
-}
+	subjects := retrieveArrayOfSubjectsWithouPauses()
+	//for _, subject := range subjects {
+	//	log.Debug(subject.name)
+	//}
 
-func hardComputation() int {
+	//idk := copy(subjects, subjects)
+
+	log.Info("Number of subjects: " + strconv.Itoa(len(subjects)))
+
 	timeStart := time.Now()
-	randNum := rand.Intn(1000000000-100000) + 100000
-	for i := 0; i < randNum; i++ {
-		math.Pow(2, 2)
+
+	for i := 0; i < 3; i++ {
+		go generateCalendars()
 	}
-	return int(time.Since(timeStart).Milliseconds())
+
+	<-shouldFinish
+
+	log.Info("Time elapsed for generating 1000000 options: " + time.Since(timeStart).String())
+
 }
 
-func produceMessage() {
-	timeStart := time.Now()
-	// run 16 threads to produce messages for 100 seconds and then stop
-	for i := 0; i < 11; i++ {
-		go func() {
-			for {
-				select {
-				case <-time.After(100 * time.Millisecond):
-					timeStamp := time.Now().String()
-					messages <- "Time: " + timeStamp + " Number: " + strconv.Itoa(hardComputation())
-				}
-				if time.Since(timeStart) > 100*time.Second {
-					isFinished <- true
-					return
-				}
-			}
-		}()
+func generateCalendars() {
+	for {
+		_ = generateNewTimeTable(retrieveArrayOfSubjectsWithouPauses())
+		generatedOptions <- 1
+		log.Debug("Generated options: " + strconv.Itoa(len(generatedOptions)))
+		if len(generatedOptions) == 1000000 {
+			shouldFinish <- true
+		}
 	}
-}
-
-func consumeMessage() {
-	for i := 0; i < 4; i++ {
-		go func(id int) {
-			for {
-				select {
-				case message := <-messages:
-					timeStamp := time.Now().String()
-					println("Thread: " + strconv.Itoa(id) + "Time: " + timeStamp + " Message: " + message)
-				}
-			}
-		}(i)
-	}
-
-	<-isFinished
 }
