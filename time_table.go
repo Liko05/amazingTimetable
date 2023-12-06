@@ -1,6 +1,7 @@
 package main
 
 import (
+	log "github.com/sirupsen/logrus"
 	"math/rand"
 	"strconv"
 )
@@ -13,17 +14,11 @@ type subject struct {
 }
 
 var time_table [5][10]subject
-var subjectsU []subject
 
 func initTimeTable() {
 	time_table = [5][10]subject{}
 	createDefault()
-	subjectsU = retrieveArrayOfSubjectsWithouPauses()
 
-}
-
-func retrieveSubjects() []subject {
-	return subjectsU
 }
 
 func createDefault() {
@@ -314,6 +309,7 @@ func generateNewTimeTable(subjects []subject) [5][10]subject {
 		for j := 0; j < 6; j++ {
 			currentSubjectIndex := rand.Intn(len(subjects))
 			currentSubjectPick := subjects[currentSubjectIndex]
+			log.Debug("Current subject pick: " + currentSubjectPick.name)
 			if currentSubjectPick.isPractical {
 				newTimeTable[i][j] = currentSubjectPick
 				newTimeTable[i][j+1] = currentSubjectPick
@@ -326,14 +322,50 @@ func generateNewTimeTable(subjects []subject) [5][10]subject {
 		}
 	}
 
+	dayIndexes := []int{0, 1, 2, 3, 4}
+	log.Info("Subjects remaining: " + strconv.Itoa(len(subjects)))
+
+	for i := 0; i < 2; i++ {
+		randomDayIndex := rand.Intn(len(dayIndexes))
+		randomDay := dayIndexes[randomDayIndex]
+		dayIndexes = append(dayIndexes[:randomDayIndex], dayIndexes[randomDayIndex+1:]...)
+		if len(subjects) == 0 {
+			break
+		}
+		newTimeTable[randomDay][6] = subject{
+			name:        "PAUSE",
+			teacher:     "",
+			room:        "",
+			isPractical: false,
+		}
+
+		for j := 0; j < 2; j++ {
+			if len(subjects) == 0 {
+				break
+			}
+			currentSubjectIndex := rand.Intn(len(subjects))
+			currentSubject := subjects[currentSubjectIndex]
+			newTimeTable[randomDay][7+j] = currentSubject
+			if currentSubject.isPractical {
+				newTimeTable[randomDay][8+j] = currentSubject
+				j++
+				subjects = removeSubjectRemainingOccurences(subjects, currentSubject)
+			} else {
+				subjects = append(subjects[:currentSubjectIndex], subjects[currentSubjectIndex+1:]...)
+			}
+		}
+
+	}
+
 	return newTimeTable
 }
 
 func removeSubjectRemainingOccurences(subjects []subject, subjectToRemove subject) []subject {
-	for i := 0; i < len(subjects); i++ {
-		if subjects[i].name == subjectToRemove.name && subjects[i].isPractical {
-			subjects = append(subjects[:i], subjects[i+1:]...)
+	var newSubjects []subject
+	for _, s := range subjects {
+		if s != subjectToRemove {
+			newSubjects = append(newSubjects, s)
 		}
 	}
-	return subjects
+	return newSubjects
 }

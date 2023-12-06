@@ -37,6 +37,7 @@ func initLogger() {
 		ForceColors:            true,
 		DisableLevelTruncation: true,
 	}})
+
 	log.SetOutput(os.Stdout)
 	log.SetLevel(log.DebugLevel)
 }
@@ -52,21 +53,20 @@ func main() {
 	initTimeTable()
 
 	subjects := retrieveArrayOfSubjectsWithouPauses()
-	//for _, subject := range subjects {
-	//	log.Debug(subject.name)
-	//}
-
-	//idk := copy(subjects, subjects)
 
 	log.Info("Number of subjects: " + strconv.Itoa(len(subjects)))
 
 	timeStart := time.Now()
-
-	for i := 0; i < 3; i++ {
-		go generateCalendars()
+	for i := 0; i < 20; i++ {
+		generatedTimeTable := generateNewTimeTable(retrieveArrayOfSubjectsWithouPauses())
+		log.Debug("Generated time table: \n" + prettyPrintWithInput(&generatedTimeTable))
 	}
 
-	<-shouldFinish
+	//for i := 0; i < 3; i++ {
+	//	go generateCalendars()
+	//}
+
+	//<-shouldFinish
 
 	log.Info("Time elapsed for generating 1000000 options: " + time.Since(timeStart).String())
 
@@ -74,7 +74,8 @@ func main() {
 
 func generateCalendars() {
 	for {
-		_ = generateNewTimeTable(retrieveArrayOfSubjectsWithouPauses())
+		generatedTimeTable := generateNewTimeTable(retrieveArrayOfSubjectsWithouPauses())
+		log.Debug("Generated time table: \n" + prettyPrintWithInput(&generatedTimeTable))
 		generatedOptions <- 1
 		log.Debug("Generated options: " + strconv.Itoa(len(generatedOptions)))
 		if len(generatedOptions) == 1000000 {
