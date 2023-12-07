@@ -291,22 +291,20 @@ func (tb *Table) prettyPrint() string {
 }
 
 func (tb *Table) hash() string {
-	if tb.Hash != "" {
-		return tb.Hash
-	}
 	var hash string
 	for i := 0; i < 5; i++ {
 		for j := 0; j < 10; j++ {
 			hash += tb.TimeTable[i][j].Name
 		}
 	}
+	log.Debug("Hash: " + hash)
 	mfhash := md5.Sum([]byte(hash))
 	tb.Hash = hex.EncodeToString(mfhash[:])
 	return tb.Hash
 }
 
-func (tb *Table) generateNewTimeTable() Table {
-	subjects := tb.retrieveArrayOfSubjectsWithoutPauses()
+func (tb *Table) generateNewTimeTable(subjs []Subject) Table {
+	subjects := subjs
 	newTimeTable := [5][10]Subject{}
 	log.Debug("Subjects: " + strconv.Itoa(len(subjects)))
 
@@ -319,7 +317,7 @@ func (tb *Table) generateNewTimeTable() Table {
 				newTimeTable[i][j] = currentSubjectPick
 				newTimeTable[i][j+1] = currentSubjectPick
 				j++
-				subjects = removeSubjectRemainingOccurences(subjects, currentSubjectPick)
+				subjects = tb.removeSubjectRemainingOccurences(subjects, currentSubjectPick)
 			} else {
 				newTimeTable[i][j] = currentSubjectPick
 				subjects = append(subjects[:currentSubjectIndex], subjects[currentSubjectIndex+1:]...)
@@ -354,7 +352,7 @@ func (tb *Table) generateNewTimeTable() Table {
 			if currentSubject.IsPractical {
 				newTimeTable[randomDay][8+j] = currentSubject
 				j++
-				subjects = removeSubjectRemainingOccurences(subjects, currentSubject)
+				subjects = tb.removeSubjectRemainingOccurences(subjects, currentSubject)
 			} else {
 				subjects = append(subjects[:currentSubjectIndex], subjects[currentSubjectIndex+1:]...)
 			}
@@ -367,7 +365,7 @@ func (tb *Table) generateNewTimeTable() Table {
 	return *tb
 }
 
-func (tb *Table) checkIfHashAlreadyExists(hashes *threadSafeListOfHashes) bool {
+func (tb *Table) checkIfHashAlreadyExists(hashes *ThreadSafeListOfHashes) bool {
 	hash := tb.hash()
 	if hashes.contains(hash) {
 		log.Debug("Hash already exists: " + hash)
@@ -378,7 +376,7 @@ func (tb *Table) checkIfHashAlreadyExists(hashes *threadSafeListOfHashes) bool {
 	}
 }
 
-func removeSubjectRemainingOccurences(subjects []Subject, subjectToRemove Subject) []Subject {
+func (tb *Table) removeSubjectRemainingOccurences(subjects []Subject, subjectToRemove Subject) []Subject {
 	var newSubjects []Subject
 	for _, s := range subjects {
 		if s != subjectToRemove {
@@ -386,4 +384,8 @@ func removeSubjectRemainingOccurences(subjects []Subject, subjectToRemove Subjec
 		}
 	}
 	return newSubjects
+}
+
+func (tb *Table) isEmpty() bool {
+	return tb.TimeTable[0][0].Name == ""
 }

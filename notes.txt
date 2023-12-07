@@ -1,0 +1,2 @@
+Generators 4 Graders 2 = Time elapsed for options: 3m0.0135921s seconds 8087713 time tables generated and 8087682 time tables checked
+Generators 6 Graders 3 = Time elapsed for options: 3m0.0152393s seconds 8433616 time tables generated and 8433197 time tables checked

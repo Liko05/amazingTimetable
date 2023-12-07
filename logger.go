@@ -7,6 +7,9 @@ import (
 	"strings"
 )
 
+// Taken from here: https://stackoverflow.com/questions/48971780/how-to-change-the-format-of-log-output-in-logrus
+// all it does is configure the logrus logger to output pretty log format
+
 type myFormatter struct {
 	log.TextFormatter
 }
@@ -34,6 +37,15 @@ func initLogger(level log.Level) {
 		ForceColors:            true,
 		DisableLevelTruncation: true,
 	}})
+
+	//open file
+	//file, err := os.OpenFile("log.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	//
+	//if err == nil {
+	//	log.SetOutput(file)
+	//} else {
+	//	log.Info("Failed to log to file, using default stderr")
+	//}
 
 	log.SetOutput(os.Stdout)
 	log.SetLevel(level)
