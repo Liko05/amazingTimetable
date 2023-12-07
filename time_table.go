@@ -1,316 +1,321 @@
 package main
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	log "github.com/sirupsen/logrus"
 	"math/rand"
 	"strconv"
 )
 
-type subject struct {
-	name        string
-	teacher     string
-	room        string
-	isPractical bool
+type Subject struct {
+	Name        string
+	Teacher     string
+	Room        string
+	IsPractical bool
 }
 
-var time_table [5][10]subject
-
-func initTimeTable() {
-	time_table = [5][10]subject{}
-	createDefault()
-
+type Table struct {
+	TimeTable [5][10]Subject
+	Hash      string
 }
 
-func createDefault() {
-	time_table[0][0] = subject{
-		name:        "TP",
-		teacher:     "No",
-		room:        "23",
-		isPractical: false,
+func (tb *Table) createDefault() {
+	tb.TimeTable[0][0] = Subject{
+		Name:        "TP",
+		Teacher:     "No",
+		Room:        "23",
+		IsPractical: false,
 	}
-	time_table[0][1] = subject{
-		name:        "AM",
-		teacher:     "Rk",
-		room:        "23",
-		isPractical: false,
+	tb.TimeTable[0][1] = Subject{
+		Name:        "AM",
+		Teacher:     "Rk",
+		Room:        "23",
+		IsPractical: false,
 	}
-	time_table[0][2] = subject{
-		name:        "A",
-		teacher:     "Jz",
-		room:        "23",
-		isPractical: false,
+	tb.TimeTable[0][2] = Subject{
+		Name:        "A",
+		Teacher:     "Jz",
+		Room:        "23",
+		IsPractical: false,
 	}
-	time_table[0][3] = subject{
-		name:        "M",
-		teacher:     "Hr",
-		room:        "23",
-		isPractical: false,
+	tb.TimeTable[0][3] = Subject{
+		Name:        "M",
+		Teacher:     "Hr",
+		Room:        "23",
+		IsPractical: false,
 	}
-	time_table[0][4] = subject{
-		name:        "M",
-		teacher:     "Hr",
-		room:        "23",
-		isPractical: false,
+	tb.TimeTable[0][4] = Subject{
+		Name:        "M",
+		Teacher:     "Hr",
+		Room:        "23",
+		IsPractical: false,
 	}
-	time_table[0][5] = subject{
-		name:        "PIS",
-		teacher:     "Bc",
-		room:        "23",
-		isPractical: false,
-	}
-
-	time_table[0][6] = subject{
-		name:        "PAUSE",
-		teacher:     "",
-		room:        "",
-		isPractical: false,
-	}
-	time_table[0][7] = subject{
-		name:        "DS",
-		teacher:     "Vc",
-		room:        "19c",
-		isPractical: true,
-	}
-	time_table[0][8] = subject{
-		name:        "DS",
-		teacher:     "Vc",
-		room:        "19c",
-		isPractical: true,
-	}
-	time_table[1][0] = subject{
-		name:        "M",
-		teacher:     "Hr",
-		room:        "23",
-		isPractical: false,
+	tb.TimeTable[0][5] = Subject{
+		Name:        "PIS",
+		Teacher:     "Bc",
+		Room:        "23",
+		IsPractical: false,
 	}
 
-	time_table[1][1] = subject{
-		name:        "A",
-		teacher:     "Jz",
-		room:        "29",
-		isPractical: false,
+	tb.TimeTable[0][6] = Subject{
+		Name:        "PAUSE",
+		Teacher:     "",
+		Room:        "",
+		IsPractical: false,
 	}
-	time_table[1][2] = subject{
-		name:        "CIT",
-		teacher:     "Sv",
-		room:        "17b",
-		isPractical: true,
+	tb.TimeTable[0][7] = Subject{
+		Name:        "DS",
+		Teacher:     "Vc",
+		Room:        "19c",
+		IsPractical: true,
 	}
-	time_table[1][3] = subject{
-		name:        "CIT",
-		teacher:     "Sv",
-		room:        "17b",
-		isPractical: true,
+	tb.TimeTable[0][8] = Subject{
+		Name:        "DS",
+		Teacher:     "Vc",
+		Room:        "19c",
+		IsPractical: true,
 	}
-	time_table[1][4] = subject{
-		name:        "PAUSE",
-		teacher:     "",
-		room:        "",
-		isPractical: false,
-	}
-	time_table[1][5] = subject{
-		name:        "C",
-		teacher:     "Mr",
-		room:        "23",
-		isPractical: false,
-	}
-	time_table[1][6] = subject{
-		name:        "PV",
-		teacher:     "Re",
-		room:        "18a",
-		isPractical: true,
+	tb.TimeTable[1][0] = Subject{
+		Name:        "M",
+		Teacher:     "Hr",
+		Room:        "23",
+		IsPractical: false,
 	}
 
-	time_table[1][7] = subject{
-		name:        "PV",
-		teacher:     "Re",
-		room:        "18a",
-		isPractical: true,
+	tb.TimeTable[1][1] = Subject{
+		Name:        "A",
+		Teacher:     "Jz",
+		Room:        "29",
+		IsPractical: false,
 	}
-	time_table[1][8] = subject{
-		name:        "TV",
-		teacher:     "Lc",
-		room:        "TV",
-		isPractical: false,
+	tb.TimeTable[1][2] = Subject{
+		Name:        "CIT",
+		Teacher:     "Sv",
+		Room:        "17b",
+		IsPractical: true,
 	}
-
-	time_table[2][0] = subject{
-		name:        "PAUSE",
-		teacher:     "",
-		room:        "",
-		isPractical: false,
+	tb.TimeTable[1][3] = Subject{
+		Name:        "CIT",
+		Teacher:     "Sv",
+		Room:        "17b",
+		IsPractical: true,
 	}
-	time_table[2][1] = subject{
-		name:        "A",
-		teacher:     "Jz",
-		room:        "23",
-		isPractical: false,
+	tb.TimeTable[1][4] = Subject{
+		Name:        "PAUSE",
+		Teacher:     "",
+		Room:        "",
+		IsPractical: false,
 	}
-	time_table[2][2] = subject{
-		name:        "C",
-		teacher:     "Mr",
-		room:        "23",
-		isPractical: false,
+	tb.TimeTable[1][5] = Subject{
+		Name:        "C",
+		Teacher:     "Mr",
+		Room:        "23",
+		IsPractical: false,
 	}
-
-	time_table[2][3] = subject{
-		name:        "WA",
-		teacher:     "Ad",
-		room:        "23",
-		isPractical: false,
+	tb.TimeTable[1][6] = Subject{
+		Name:        "PV",
+		Teacher:     "Re",
+		Room:        "18a",
+		IsPractical: true,
 	}
 
-	time_table[2][4] = subject{
-		name:        "DS",
-		teacher:     "Vc",
-		room:        "23",
-		isPractical: false,
+	tb.TimeTable[1][7] = Subject{
+		Name:        "PV",
+		Teacher:     "Re",
+		Room:        "18a",
+		IsPractical: true,
+	}
+	tb.TimeTable[1][8] = Subject{
+		Name:        "TV",
+		Teacher:     "Lc",
+		Room:        "TV",
+		IsPractical: false,
 	}
 
-	time_table[2][5] = subject{
-		name:        "PSS",
-		teacher:     "Mo",
-		room:        "8a",
-		isPractical: true,
+	tb.TimeTable[2][0] = Subject{
+		Name:        "PAUSE",
+		Teacher:     "",
+		Room:        "",
+		IsPractical: false,
+	}
+	tb.TimeTable[2][1] = Subject{
+		Name:        "A",
+		Teacher:     "Jz",
+		Room:        "23",
+		IsPractical: false,
+	}
+	tb.TimeTable[2][2] = Subject{
+		Name:        "C",
+		Teacher:     "Mr",
+		Room:        "23",
+		IsPractical: false,
 	}
 
-	time_table[2][6] = subject{
-		name:        "PSS",
-		teacher:     "Mo",
-		room:        "8a",
-		isPractical: true,
+	tb.TimeTable[2][3] = Subject{
+		Name:        "WA",
+		Teacher:     "Ad",
+		Room:        "23",
+		IsPractical: false,
 	}
 
-	time_table[3][0] = subject{
-		name:        "WA",
-		teacher:     "Na",
-		room:        "19b",
-		isPractical: true,
+	tb.TimeTable[2][4] = Subject{
+		Name:        "DS",
+		Teacher:     "Vc",
+		Room:        "23",
+		IsPractical: false,
 	}
 
-	time_table[3][1] = subject{
-		name:        "WA",
-		teacher:     "Na",
-		room:        "19b",
-		isPractical: true,
+	tb.TimeTable[2][5] = Subject{
+		Name:        "PSS",
+		Teacher:     "Mo",
+		Room:        "8a",
+		IsPractical: true,
 	}
 
-	time_table[3][2] = subject{
-		name:        "M",
-		teacher:     "Hr",
-		room:        "23",
-		isPractical: false,
+	tb.TimeTable[2][6] = Subject{
+		Name:        "PSS",
+		Teacher:     "Mo",
+		Room:        "8a",
+		IsPractical: true,
 	}
 
-	time_table[3][3] = subject{
-		name:        "A",
-		teacher:     "Jz",
-		room:        "23",
-		isPractical: false,
+	tb.TimeTable[3][0] = Subject{
+		Name:        "WA",
+		Teacher:     "Na",
+		Room:        "19b",
+		IsPractical: true,
 	}
 
-	time_table[3][4] = subject{
-		name:        "PV",
-		teacher:     "Re",
-		room:        "23",
-		isPractical: false,
+	tb.TimeTable[3][1] = Subject{
+		Name:        "WA",
+		Teacher:     "Na",
+		Room:        "19b",
+		IsPractical: true,
 	}
-	time_table[3][5] = subject{
-		name:        "PIS",
-		teacher:     "Bc",
-		room:        "19a",
-		isPractical: true,
+
+	tb.TimeTable[3][2] = Subject{
+		Name:        "M",
+		Teacher:     "Hr",
+		Room:        "23",
+		IsPractical: false,
 	}
-	time_table[3][6] = subject{
-		name:        "PIS",
-		teacher:     "Bc",
-		room:        "19a",
-		isPractical: true,
+
+	tb.TimeTable[3][3] = Subject{
+		Name:        "A",
+		Teacher:     "Jz",
+		Room:        "23",
+		IsPractical: false,
 	}
-	time_table[4][0] = subject{
-		name:        "PAUSE",
-		teacher:     "",
-		room:        "",
-		isPractical: false,
+
+	tb.TimeTable[3][4] = Subject{
+		Name:        "PV",
+		Teacher:     "Re",
+		Room:        "23",
+		IsPractical: false,
 	}
-	time_table[4][1] = subject{
-		name:        "C",
-		teacher:     "Mr",
-		room:        "23",
-		isPractical: false,
+	tb.TimeTable[3][5] = Subject{
+		Name:        "PIS",
+		Teacher:     "Bc",
+		Room:        "19a",
+		IsPractical: true,
 	}
-	time_table[4][2] = subject{
-		name:        "PSS",
-		teacher:     "Ms",
-		room:        "23",
-		isPractical: false,
+	tb.TimeTable[3][6] = Subject{
+		Name:        "PIS",
+		Teacher:     "Bc",
+		Room:        "19a",
+		IsPractical: true,
 	}
-	time_table[4][3] = subject{
-		name:        "AM",
-		teacher:     "Rk",
-		room:        "23",
-		isPractical: false,
+	tb.TimeTable[4][0] = Subject{
+		Name:        "PAUSE",
+		Teacher:     "",
+		Room:        "",
+		IsPractical: false,
 	}
-	time_table[4][4] = subject{
-		name:        "PIS",
-		teacher:     "Bc",
-		room:        "23",
-		isPractical: false,
+	tb.TimeTable[4][1] = Subject{
+		Name:        "C",
+		Teacher:     "Mr",
+		Room:        "23",
+		IsPractical: false,
 	}
-	time_table[4][5] = subject{
-		name:        "TV",
-		teacher:     "Lc",
-		room:        "TV",
-		isPractical: false,
+	tb.TimeTable[4][2] = Subject{
+		Name:        "PSS",
+		Teacher:     "Ms",
+		Room:        "23",
+		IsPractical: false,
 	}
+	tb.TimeTable[4][3] = Subject{
+		Name:        "AM",
+		Teacher:     "Rk",
+		Room:        "23",
+		IsPractical: false,
+	}
+	tb.TimeTable[4][4] = Subject{
+		Name:        "PIS",
+		Teacher:     "Bc",
+		Room:        "23",
+		IsPractical: false,
+	}
+	tb.TimeTable[4][5] = Subject{
+		Name:        "TV",
+		Teacher:     "Lc",
+		Room:        "TV",
+		IsPractical: false,
+	}
+
+	tb.Hash = ""
 }
 
-func retrieveArrayOfSubjectsWithouPauses() []subject {
-	var subjects []subject
+func (tb *Table) retrieveArrayOfSubjectsWithoutPauses() []Subject {
+	var subjects []Subject
 	for i := 0; i < 5; i++ {
 		for j := 0; j < 10; j++ {
-			currentSubject := time_table[i][j]
-			if currentSubject.name != "PAUSE" && currentSubject.name != "" {
+			currentSubject := tb.TimeTable[i][j]
+			if currentSubject.Name != "PAUSE" && currentSubject.Name != "" {
 				subjects = append(subjects, currentSubject)
 			}
 		}
 	}
-	//shuffle the array
-
 	return subjects
 }
 
-func prettyPrint() string {
+func (tb *Table) prettyPrint() string {
 	var str string
 	for i := 0; i < 5; i++ {
 		for j := 0; j < 10; j++ {
-			str += time_table[i][j].name + " " + strconv.FormatBool(time_table[i][j].isPractical) + " | "
+			str += tb.TimeTable[i][j].Name + " " + strconv.FormatBool(tb.TimeTable[i][j].IsPractical) + " | "
 		}
 		str += "\n"
 	}
 	return str
 }
 
-func prettyPrintWithInput(timeTableNew *[5][10]subject) string {
-	var str string
+func (tb *Table) hash() string {
+	if tb.Hash != "" {
+		return tb.Hash
+	}
+	var hash string
 	for i := 0; i < 5; i++ {
 		for j := 0; j < 10; j++ {
-			str += timeTableNew[i][j].name + " " + strconv.FormatBool(timeTableNew[i][j].isPractical) + " | "
+			hash += tb.TimeTable[i][j].Name
 		}
-		str += "\n"
 	}
-	return str
+	mfhash := md5.Sum([]byte(hash))
+	tb.Hash = hex.EncodeToString(mfhash[:])
+	return tb.Hash
 }
 
-func generateNewTimeTable(subjects []subject) [5][10]subject {
-	newTimeTable := [5][10]subject{}
+func (tb *Table) generateNewTimeTable() Table {
+	subjects := tb.retrieveArrayOfSubjectsWithoutPauses()
+	newTimeTable := [5][10]Subject{}
+	log.Debug("Subjects: " + strconv.Itoa(len(subjects)))
 
 	for i := 0; i < 5; i++ {
 		for j := 0; j < 6; j++ {
 			currentSubjectIndex := rand.Intn(len(subjects))
 			currentSubjectPick := subjects[currentSubjectIndex]
-			log.Debug("Current subject pick: " + currentSubjectPick.name)
-			if currentSubjectPick.isPractical {
+			log.Debug("Current Subject pick: " + currentSubjectPick.Name)
+			if currentSubjectPick.IsPractical {
 				newTimeTable[i][j] = currentSubjectPick
 				newTimeTable[i][j+1] = currentSubjectPick
 				j++
@@ -323,7 +328,7 @@ func generateNewTimeTable(subjects []subject) [5][10]subject {
 	}
 
 	dayIndexes := []int{0, 1, 2, 3, 4}
-	log.Info("Subjects remaining: " + strconv.Itoa(len(subjects)))
+	log.Debug("Subjects remaining: " + strconv.Itoa(len(subjects)))
 
 	for i := 0; i < 2; i++ {
 		randomDayIndex := rand.Intn(len(dayIndexes))
@@ -332,11 +337,11 @@ func generateNewTimeTable(subjects []subject) [5][10]subject {
 		if len(subjects) == 0 {
 			break
 		}
-		newTimeTable[randomDay][6] = subject{
-			name:        "PAUSE",
-			teacher:     "",
-			room:        "",
-			isPractical: false,
+		newTimeTable[randomDay][6] = Subject{
+			Name:        "PAUSE",
+			Teacher:     "",
+			Room:        "",
+			IsPractical: false,
 		}
 
 		for j := 0; j < 2; j++ {
@@ -346,7 +351,7 @@ func generateNewTimeTable(subjects []subject) [5][10]subject {
 			currentSubjectIndex := rand.Intn(len(subjects))
 			currentSubject := subjects[currentSubjectIndex]
 			newTimeTable[randomDay][7+j] = currentSubject
-			if currentSubject.isPractical {
+			if currentSubject.IsPractical {
 				newTimeTable[randomDay][8+j] = currentSubject
 				j++
 				subjects = removeSubjectRemainingOccurences(subjects, currentSubject)
@@ -357,11 +362,24 @@ func generateNewTimeTable(subjects []subject) [5][10]subject {
 
 	}
 
-	return newTimeTable
+	tb.TimeTable = newTimeTable
+
+	return *tb
 }
 
-func removeSubjectRemainingOccurences(subjects []subject, subjectToRemove subject) []subject {
-	var newSubjects []subject
+func (tb *Table) checkIfHashAlreadyExists(hashes *threadSafeListOfHashes) bool {
+	hash := tb.hash()
+	if hashes.contains(hash) {
+		log.Debug("Hash already exists: " + hash)
+		return true
+	} else {
+		hashes.add(hash)
+		return false
+	}
+}
+
+func removeSubjectRemainingOccurences(subjects []Subject, subjectToRemove Subject) []Subject {
+	var newSubjects []Subject
 	for _, s := range subjects {
 		if s != subjectToRemove {
 			newSubjects = append(newSubjects, s)
