@@ -2,14 +2,11 @@ package main
 
 import (
 	log "github.com/sirupsen/logrus"
-	"math/rand"
-	"strconv"
 	"time"
 )
 
 type Graders struct {
 	NumberOfWorkers int
-	ShouldFinish    chan bool
 	Counters        *ThreadSafeCounters
 	ProcessingQueue *ProcessingQueue
 }
@@ -23,33 +20,130 @@ func (g *Graders) Start() {
 func (g *Graders) GradeTimeTablesStartWorker() {
 	for {
 		log.Debug("Checking new time table")
-		t := <-g.ProcessingQueue.queue
-		if t.isEmpty() {
-			log.Debug("No more time tables to check")
-			time.Sleep(1 * time.Millisecond)
+		table, ok := g.ProcessingQueue.Pop().(Table)
+		if ok == false {
+			time.Sleep(10 * time.Nanosecond)
 			continue
 		}
-		log.Debug("Checking time table: " + t.prettyPrint())
-		score := t.getScore()
-		if score > g.ProcessingQueue.GetHighestScore() {
-			g.ProcessingQueue.SetHighestScore(score)
-			g.ProcessingQueue.bestTable = t
-			log.Debug("New highest score: " + strconv.Itoa(score))
+
+		if table.gradeTimeTable() {
+
+			g.Counters.incrementValid()
+			g.ProcessingQueue.AddIfBetter(table)
 		}
 		g.Counters.incrementChecked()
 	}
 }
 
-func (tb *Table) getScore() int {
-	score := 0
+func (tb *Table) gradeTimeTable() bool {
+
+	//dayIndex := 0
+	//for i, subject := range tb.TimeTable {
+	//	dayIndex = getDayIndex(i)
+	//	switch {
+	//	case i > 0 && i%10 != 0:
+	//		tb.Score += tb.roomChangePoints(i)
+	//	}
+	//}
+
+	return tb.isWeekReasonable()
+}
+
+func (tb *Table) isWeekReasonable() bool {
+	dayIndex := 0
 	for i := 0; i < 5; i++ {
-		for j := 0; j < 10; j++ {
-			if tb.TimeTable[i][j].IsPractical {
-				score += rand.Intn(250)
-			} else {
-				score += rand.Intn(100)
+		dayIndex = i * 10
+		tb.Score += tb.lunchBreaks(dayIndex)
+		tb.Score += tb.legalityOfTheDay(dayIndex)
+		if !tb.isPracticalSubjectConnecting(dayIndex) {
+			return false
+		}
+	}
+
+	if tb.Score >= -20000 {
+		return true
+	}
+	return false
+}
+
+func (tb *Table) roomChangePoints(index int) int {
+	previous, current := tb.TimeTable[index-1], tb.TimeTable[index]
+	if previous.Room == current.Room {
+		return 100
+	}
+	if previous.floorNumber() == current.floorNumber() {
+		return 50
+	}
+	return -25
+}
+
+//day rules
+
+func (tb *Table) lunchBreaks(dayIndex int) int {
+	for i := dayIndex + 5; i < dayIndex+9; i++ {
+		if tb.TimeTable[i].Name == "" {
+			return 100
+		}
+	}
+	return -100000
+}
+
+func (tb *Table) legalityOfTheDay(dayIndex int) int {
+	classes := 0
+	for i := dayIndex; i <= dayIndex+9; i++ {
+		if tb.TimeTable[i].Name != "" {
+			classes++
+		}
+	}
+
+	switch {
+	case classes < 7:
+		return 25
+	case classes == 7:
+		return 0
+	case classes == 8 || classes == 9:
+		return -25
+	default:
+		return -100000
+	}
+}
+
+func (tb *Table) isPracticalSubjectConnecting(dayIndex int) bool {
+	for i := dayIndex; i < dayIndex+9; i++ {
+		currentSubject := tb.TimeTable[i]
+		if i-dayIndex != 0 && i != dayIndex+9 {
+			if !currentSubject.IsPractical {
+				continue
+			}
+			previousSubject := tb.TimeTable[i-1]
+			upcomingSubject := tb.TimeTable[i+1]
+			isOkay := false
+
+			if previousSubject.Name == currentSubject.Name && previousSubject.IsPractical {
+				isOkay = true
+			}
+			if upcomingSubject.Name == currentSubject.Name && upcomingSubject.IsPractical {
+				isOkay = true
+			}
+
+			if isOkay == false {
+				return false
 			}
 		}
 	}
-	return score
+	return true
+}
+
+func (tb *Table) gradeSubjectsInDay(dayIndex int) int {
+	finalScore := 0
+	for i := dayIndex; i <= dayIndex+9; i++ {
+		if tb.TimeTable[i].Name != "" {
+			if i-dayIndex < 6 {
+				finalScore += 100
+			} else {
+				finalScore -= 100
+			}
+		}
+	}
+	return finalScore
 }

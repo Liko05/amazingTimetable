@@ -6,6 +6,7 @@ type ThreadSafeCounters struct {
 	mu               sync.Mutex
 	generatedOptions uint64
 	checkedOptions   uint64
+	validOptions     uint64
 }
 
 func (l *ThreadSafeCounters) incrementGenerated() {
@@ -30,4 +31,16 @@ func (l *ThreadSafeCounters) getChecked() uint64 {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	return l.checkedOptions
+}
+
+func (l *ThreadSafeCounters) incrementValid() {
+	l.mu.Lock()
+	l.validOptions++
+	l.mu.Unlock()
+}
+
+func (l *ThreadSafeCounters) getValid() uint64 {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	return l.validOptions
 }

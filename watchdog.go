@@ -9,16 +9,16 @@ import (
 type Watchdog struct {
 	DesiredDuration             int // seconds
 	DelayBetweenProgressUpdates int // seconds
+	ShouldFinish                chan bool
 }
 
-func (w *Watchdog) Start(shouldFinish chan bool, timeStart time.Time, counters *ThreadSafeCounters) {
+func (w *Watchdog) Start(timeStart time.Time, counters *ThreadSafeCounters) {
 	go func() {
 		lastUpdate := time.Now()
 		for {
 			if time.Since(timeStart).Seconds() >= float64(w.DesiredDuration) {
-				shouldFinish <- true
+				w.ShouldFinish <- true
 			} else if time.Since(lastUpdate).Seconds() >= float64(w.DelayBetweenProgressUpdates) {
-				time.Sleep(time.Duration(w.DelayBetweenProgressUpdates) * time.Second)
 				log.Info("Generated time tables: " + strconv.FormatUint(counters.getGenerated(), 10) + " Checked time tables: " + strconv.FormatUint(counters.getChecked(), 10))
 				lastUpdate = time.Now()
 			}
