@@ -23,7 +23,7 @@ func (g *Graders) Start() {
 func (g *Graders) GradeTimeTablesStartWorker() {
 	for {
 		log.Debug("Checking new time table")
-		t := g.ProcessingQueue.GetFromQueue()
+		t := <-g.ProcessingQueue.queue
 		if t.isEmpty() {
 			log.Debug("No more time tables to check")
 			time.Sleep(1 * time.Millisecond)

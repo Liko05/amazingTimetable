@@ -1,6 +1,8 @@
 package main
 
-import log "github.com/sirupsen/logrus"
+import (
+	log "github.com/sirupsen/logrus"
+)
 
 type Generators struct {
 	Hashes          *ThreadSafeListOfHashes
@@ -19,20 +21,21 @@ func (g *Generators) Start() {
 func (g *Generators) GenerateTimeTablesStartWorker() {
 	defaultTimeTable := Table{}
 	defaultTimeTable.createDefault()
-	g.ProcessingQueue.AddToQueue(defaultTimeTable)
+	g.ProcessingQueue.queue <- defaultTimeTable
 	g.Counters.incrementGenerated() //4860
 	for {
 		defaultTimeTable = defaultTimeTable.generateNewTimeTable(defaultTimeTable.retrieveArrayOfSubjectsWithoutPauses())
 		log.Debug(defaultTimeTable.prettyPrint())
 		//log.Debug(g.Hashes.hashes)
-		if !defaultTimeTable.checkIfHashAlreadyExists(g.Hashes) {
-			g.Counters.incrementGenerated()
-			log.Debug("Sent new time table for checking")
-			g.ProcessingQueue.AddToQueue(defaultTimeTable)
-		} else {
-			log.Debug("Found duplicate hash")
-			g.ShouldFinish <- true
-		}
+		//if !defaultTimeTable.checkIfHashAlreadyExists(g.Hashes) {
+		g.Counters.incrementGenerated()
+		g.ProcessingQueue.queue <- defaultTimeTable
+		//	log.Debug("Sent new time table for checking")
+		//	g.ProcessingQueue.AddToQueue(defaultTimeTable)
+		//} else {
+		//	log.Debug("Found duplicate hash")
+		//	g.ShouldFinish <- true
+		//}
 		log.Debug("Generating again")
 	}
 }

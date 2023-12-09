@@ -16,11 +16,15 @@ type Subject struct {
 }
 
 type Table struct {
-	TimeTable [5][10]Subject
+	TimeTable map[int]map[int]Subject
 	Hash      string
 }
 
 func (tb *Table) createDefault() {
+	tb.TimeTable = make(map[int]map[int]Subject)
+	for i := 0; i < 5; i++ {
+		tb.TimeTable[i] = make(map[int]Subject)
+	}
 	tb.TimeTable[0][0] = Subject{
 		Name:        "TP",
 		Teacher:     "No",
@@ -305,7 +309,10 @@ func (tb *Table) hash() string {
 
 func (tb *Table) generateNewTimeTable(subjs []Subject) Table {
 	subjects := subjs
-	newTimeTable := [5][10]Subject{}
+	newTimeTable := make(map[int]map[int]Subject)
+	for i := 0; i < 5; i++ {
+		newTimeTable[i] = make(map[int]Subject)
+	}
 	log.Debug("Subjects: " + strconv.Itoa(len(subjects)))
 
 	for i := 0; i < 5; i++ {

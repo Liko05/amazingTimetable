@@ -14,7 +14,7 @@ func main() {
 	hashes := ThreadSafeListOfHashes{hashes: make(map[string]bool)}
 	var shouldFinish = make(chan bool)
 	var counters = ThreadSafeCounters{}
-	var queue = make([]Table, 0)
+	var queue = make(chan Table, 1000000)
 	var processingQueue = ProcessingQueue{
 		mu:                  sync.Mutex{},
 		queue:               queue,
@@ -23,7 +23,7 @@ func main() {
 	}
 
 	// worker variables
-	var watchdog = Watchdog{DesiredDuration: 180, DelayBetweenProgressUpdates: 60}
+	var watchdog = Watchdog{DesiredDuration: 180, DelayBetweenProgressUpdates: 10}
 	var generators = Generators{
 		Hashes:          &hashes,
 		ShouldFinish:    shouldFinish,
