@@ -10,16 +10,16 @@ type Generators struct {
 	ProcessingQueue *ProcessingQueue
 }
 
-func (g *Generators) Start() {
+func (g *Generators) start() {
 	initTable := Table{}
 	initTable.createDefault()
 	g.ProcessingQueue.Push(initTable)
 	for i := 0; i < g.NumberOfWorkers; i++ {
-		go g.GenerateTimeTablesStartWorker()
+		go g.generateTimeTablesStartWorker()
 	}
 }
 
-func (g *Generators) GenerateTimeTablesStartWorker() {
+func (g *Generators) generateTimeTablesStartWorker() {
 	defaultTimeTable := Table{}
 	defaultTimeTable.createDefault()
 	for {

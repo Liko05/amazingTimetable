@@ -11,13 +11,13 @@ type Graders struct {
 	ProcessingQueue *ProcessingQueue
 }
 
-func (g *Graders) Start() {
+func (g *Graders) start() {
 	for i := 0; i < g.NumberOfWorkers; i++ {
-		go g.GradeTimeTablesStartWorker()
+		go g.gradeTimeTablesStartWorker()
 	}
 }
 
-func (g *Graders) GradeTimeTablesStartWorker() {
+func (g *Graders) gradeTimeTablesStartWorker() {
 	for {
 		log.Debug("Checking new time table")
 		table, ok := g.ProcessingQueue.Pop().(Table)
@@ -27,7 +27,6 @@ func (g *Graders) GradeTimeTablesStartWorker() {
 		}
 
 		if table.gradeTimeTable() {
-
 			g.Counters.incrementValid()
 			g.ProcessingQueue.AddIfBetter(table)
 		}
@@ -53,34 +52,46 @@ func (tb *Table) isWeekReasonable() bool {
 	dayIndex := 0
 	for i := 0; i < 5; i++ {
 		dayIndex = i * 10
+
+		//mandatory rules which might return early so we dont waster resources
 		tb.Score += tb.lunchBreaks(dayIndex)
 		tb.Score += tb.legalityOfTheDay(dayIndex)
-		if !tb.isPracticalSubjectConnecting(dayIndex) {
+		if !tb.isPracticalSubjectConnecting(dayIndex) || tb.Score < -20000 {
 			return false
 		}
+
+		//optional rules
+		tb.Score += tb.gradeSubjectsInDay(dayIndex)
+		tb.Score += tb.roomChangePoints(dayIndex)
+		tb.Score += tb.gradeIfSubjectOccursMultipleTimes(dayIndex)
+		tb.Score += tb.checkIfStartsWithProfileSubjects(dayIndex)
+		tb.Score += tb.checkIfEndsWithProfileSubjects(dayIndex)
+		tb.Score += tb.isFirstClassHighestFloor(dayIndex)
 	}
 
-	if tb.Score >= -20000 {
-		return true
-	}
-	return false
+	return true
 }
 
-func (tb *Table) roomChangePoints(index int) int {
-	previous, current := tb.TimeTable[index-1], tb.TimeTable[index]
-	if previous.Room == current.Room {
-		return 100
+func (tb *Table) roomChangePoints(dayIndex int) int {
+	final := 0
+	for i := dayIndex; i < dayIndex+9; i++ {
+		currentSubject := tb.TimeTable[i]
+		if i-dayIndex != 0 {
+			previousSubject := tb.TimeTable[i-1]
+			if previousSubject.Room == currentSubject.Room && previousSubject.Name != "" {
+				final += 100
+			} else if previousSubject.Floor == currentSubject.Floor {
+				final += 50
+			} else {
+				final -= 100
+			}
+		}
 	}
-	if previous.floorNumber() == current.floorNumber() {
-		return 50
-	}
-	return -25
+	return final
 }
-
-//day rules
 
 func (tb *Table) lunchBreaks(dayIndex int) int {
-	for i := dayIndex + 5; i < dayIndex+9; i++ {
+	for i := dayIndex + 4; i < dayIndex+9; i++ {
 		if tb.TimeTable[i].Name == "" {
 			return 100
 		}
@@ -146,4 +157,69 @@ func (tb *Table) gradeSubjectsInDay(dayIndex int) int {
 		}
 	}
 	return finalScore
+}
+
+func (tb *Table) gradeIfSubjectOccursMultipleTimes(dayIndex int) int {
+	finalScore := 0
+	subjectOccurrences := make(map[string]int)
+	for i := dayIndex; i <= dayIndex+9; i++ {
+		if tb.TimeTable[i].Name != "" && !tb.TimeTable[i].IsPractical {
+			subjectOccurrences[tb.TimeTable[i].Name]++
+		}
+	}
+
+	for _, occurrence := range subjectOccurrences {
+		if occurrence > 1 {
+			finalScore -= 100
+		}
+	}
+
+	return finalScore
+}
+
+func (tb *Table) checkIfStartsWithProfileSubjects(dayIndex int) int {
+	finalScore := 0
+	profileSubjects := []string{"M", "PV", "WA", "C", "DS", "PSS"}
+	for i := dayIndex; i <= dayIndex+9; i++ {
+		if i-dayIndex == 0 {
+			for _, subject := range profileSubjects {
+				if tb.TimeTable[i].Name == subject {
+					finalScore -= 100
+				}
+			}
+		}
+	}
+	return finalScore
+}
+
+func (tb *Table) checkIfEndsWithProfileSubjects(dayIndex int) int {
+	finalScore := 0
+	profileSubjects := []string{"M", "PV", "WA", "C", "DS", "PSS"}
+	lunchBreakIndex := 0
+	for i := dayIndex + 4; i <= dayIndex+9; i++ {
+		if tb.TimeTable[i].Name == "" {
+			lunchBreakIndex = i
+			break
+		}
+	}
+
+	for i := lunchBreakIndex + 1; i <= dayIndex+9; i++ {
+		if tb.TimeTable[i].Name != "" {
+			for _, subject := range profileSubjects {
+				if tb.TimeTable[i].Name == subject {
+					finalScore -= 100
+
+				}
+			}
+			break
+		}
+	}
+	return finalScore
+}
+
+func (tb *Table) isFirstClassHighestFloor(dayIndex int) int {
+	if tb.TimeTable[dayIndex].Floor == 4 {
+		return -250
+	}
+	return 0
 }

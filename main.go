@@ -13,13 +13,19 @@ func main() {
 
 	//thread shared variables
 	var shouldFinish = make(chan bool)
-	var counters = ThreadSafeCounters{}
+	var counters = ThreadSafeCounters{
+		mu:               sync.Mutex{},
+		generatedOptions: 0,
+		checkedOptions:   0,
+		validOptions:     0,
+	}
 	var processingQueue = ProcessingQueue{
 		mu:    sync.Mutex{},
 		queue: make([]interface{}, 0),
 		bestTable: Table{
 			Score: -10000,
 		},
+		bestTables: make([]Table, 0),
 	}
 
 	// worker variables
@@ -43,17 +49,13 @@ func main() {
 	timeStart := time.Now()
 
 	watchdog.Start(timeStart, &counters)
-	generators.Start()
-	graders.Start()
+	generators.start()
+	graders.start()
 
 	<-shouldFinish
 	log.Info("Time elapsed for " + strconv.FormatUint(counters.getGenerated(), 10) + " options: " + time.Since(timeStart).String() + " time tables generated and " + strconv.FormatUint(counters.getChecked(), 10) + " time tables checked")
-
-	//wait for input to exit
-	log.Info("Finished \n \n \n \n ")
-	log.Info("Best table: \n" + processingQueue.bestTable.String())
-	log.Info("Score: " + strconv.Itoa(processingQueue.bestTable.Score))
-	log.Info(counters.getValid())
+	log.Info("Best table:" + "\n")
+	log.Info(processingQueue.bestTable.String())
 	var input string
 	log.Info("Press enter to exit")
 	_, _ = fmt.Scanln(&input)

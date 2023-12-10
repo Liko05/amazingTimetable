@@ -5,9 +5,10 @@ import (
 )
 
 type ProcessingQueue struct {
-	mu        sync.Mutex
-	queue     []interface{}
-	bestTable Table
+	mu         sync.Mutex
+	queue      []interface{}
+	bestTable  Table
+	bestTables []Table // left here just for debugging purposes
 }
 
 func (q *ProcessingQueue) Push(element interface{}) {
@@ -42,4 +43,16 @@ func (q *ProcessingQueue) AddIfBetter(element interface{}) {
 	if table.Score > q.bestTable.Score {
 		q.bestTable = table
 	}
+}
+
+func (q *ProcessingQueue) AddToBestTables(element interface{}) {
+	q.mu.Lock()
+	defer q.mu.Unlock()
+
+	table, ok := element.(Table)
+	if ok == false {
+		return
+	}
+
+	q.bestTables = append(q.bestTables, table)
 }
