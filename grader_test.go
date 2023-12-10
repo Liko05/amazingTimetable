@@ -196,3 +196,25 @@ func TestCheckIfEndsWithProfileSubjects(t *testing.T) {
 		}
 	}
 }
+
+func TestIsFirstClassHighestFloor(t *testing.T) {
+	tb := Table{}
+	tb.createDefault()
+
+	dayIndex := 0
+
+	results := [5]int{}
+
+	for i := 0; i < 5; i++ {
+		dayIndex = i * 10
+		results[i] = tb.isFirstClassHighestFloor(dayIndex)
+	}
+
+	expected := [5]int{-250, -250, -250, 0, -250}
+
+	for i := 0; i < 5; i++ {
+		if results[i] != expected[i] {
+			t.Errorf("isFirstClassHighestFloor(%v) = %v, want %v", i*10, results[i], expected[i])
+		}
+	}
+}

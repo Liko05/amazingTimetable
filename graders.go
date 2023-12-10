@@ -218,8 +218,18 @@ func (tb *Table) checkIfEndsWithProfileSubjects(dayIndex int) int {
 }
 
 func (tb *Table) isFirstClassHighestFloor(dayIndex int) int {
-	if tb.TimeTable[dayIndex].Floor == 4 {
+	if tb.TimeTable[dayIndex].Floor == 4 && tb.TimeTable[dayIndex].Name != "" {
 		return -250
+	} else {
+		for i := dayIndex + 1; i <= dayIndex+9; i++ {
+			if tb.TimeTable[i].Name != "" {
+				if tb.TimeTable[i].Floor == 4 {
+					return -250
+				} else {
+					return -0
+				}
+			}
+		}
 	}
 	return 0
 }
