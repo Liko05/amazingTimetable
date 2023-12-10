@@ -4,7 +4,7 @@ import "testing"
 
 func TestTable_Hash(t *testing.T) {
 	table := Table{}
-	table.createDefault()
+	table.CreateDefault()
 
 	hash := table.Hash()
 

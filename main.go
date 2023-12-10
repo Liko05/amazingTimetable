@@ -1,61 +1,115 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	log "github.com/sirupsen/logrus"
+	"os"
 	"strconv"
 	"sync"
 	"time"
 )
 
-func main() {
-	initLogger(log.InfoLevel)
-
-	//thread shared variables
+// CreateVariablesForWorkers creates the variables that will be used and shared by the workers
+func CreateVariablesForWorkers() (chan bool, *ThreadSafeCounters, *ProcessingQueue) {
 	var shouldFinish = make(chan bool)
 	var counters = ThreadSafeCounters{
-		mu:               sync.Mutex{},
-		generatedOptions: 0,
-		checkedOptions:   0,
-		validOptions:     0,
+		Mu:               sync.Mutex{},
+		GeneratedOptions: 0,
+		CheckedOptions:   0,
+		ValidOptions:     0,
 	}
 	var processingQueue = ProcessingQueue{
-		mu:    sync.Mutex{},
-		queue: make([]interface{}, 0),
-		bestTable: Table{
+		Mu:    sync.Mutex{},
+		Queue: make([]interface{}, 0),
+		BestTable: Table{
 			Score: -10000,
 		},
-		bestTables: make([]Table, 0),
+		BestTables: make([]Table, 0),
 	}
+	return shouldFinish, &counters, &processingQueue
+}
 
-	// worker variables
+// CreateWorkers creates the workers that will be used to generate and grade the timetables and the watchdog that will monitor the progress
+func CreateWorkers(shouldFinish chan bool, counters *ThreadSafeCounters, processingQueue *ProcessingQueue) (Watchdog, Generator, Grader) {
 	var watchdog = Watchdog{
-		DesiredDuration:             180,
-		DelayBetweenProgressUpdates: 10,
-		ShouldFinish:                shouldFinish,
+		ShouldFinish: shouldFinish,
+		Counters:     counters,
 	}
-	var generators = Generators{
-		Counters:        &counters,
-		NumberOfWorkers: 7,
-		ProcessingQueue: &processingQueue,
+	var generators = Generator{
+		Counters:        counters,
+		ProcessingQueue: processingQueue,
 	}
-	var graders = Graders{
-		NumberOfWorkers: 12,
-		Counters:        &counters,
-		ProcessingQueue: &processingQueue,
+	var graders = Grader{
+		Counters:        counters,
+		ProcessingQueue: processingQueue,
+	}
+	return watchdog, generators, graders
+}
+
+// GetArgsAndApplyArgs gets the arguments from the command line and applies them to the workers
+func GetArgsAndApplyArgs(watchdog *Watchdog, generators *Generator, graders *Grader) {
+	var timeLimit int
+	var timeBetweenProgressUpdates int
+	var numberOfGenerators int
+	var numberOfGraders int
+	var debugLevel bool
+	var help bool
+
+	flag.IntVar(&timeLimit, "t", 180, "The time limit in seconds")
+	flag.IntVar(&timeBetweenProgressUpdates, "p", 10, "The time between progress updates in seconds")
+	flag.IntVar(&numberOfGenerators, "g", 7, "The number of generators")
+	flag.IntVar(&numberOfGraders, "r", 12, "The number of graders")
+	flag.BoolVar(&debugLevel, "d", false, "Enable debug level logging")
+	flag.BoolVar(&help, "h", false, "Show help")
+
+	flag.Parse()
+
+	if help {
+		flag.Usage()
+		os.Exit(0)
 	}
 
-	log.Info("Starting to generate time tables")
+	if debugLevel {
+		InitLogger(log.DebugLevel)
+		log.Debug("Time limit: " + strconv.Itoa(timeLimit) + " seconds")
+		log.Debug("Time between progress updates: " + strconv.Itoa(timeBetweenProgressUpdates) + " seconds")
+		log.Debug("Number of generators: " + strconv.Itoa(numberOfGenerators))
+		log.Debug("Number of graders: " + strconv.Itoa(numberOfGraders))
+	} else {
+		InitLogger(log.InfoLevel)
+	}
+
+	watchdog.DesiredDuration = timeLimit
+	watchdog.DelayBetweenProgressUpdates = timeBetweenProgressUpdates
+
+	generators.NumberOfWorkers = numberOfGenerators
+	graders.NumberOfWorkers = numberOfGraders
+
+	log.Info("Starting with time limit: " + strconv.Itoa(timeLimit) + " seconds")
+}
+
+// main is the entry point of the program
+func main() {
+	shouldFinish, counters, processingQueue := CreateVariablesForWorkers()
+	watchdog, generators, graders := CreateWorkers(shouldFinish, counters, processingQueue)
+
+	GetArgsAndApplyArgs(&watchdog, &generators, &graders)
+
 	timeStart := time.Now()
 
-	watchdog.Start(timeStart, &counters)
-	generators.start()
-	graders.start()
+	watchdog.Start(timeStart)
+	generators.Start()
+	graders.Start()
 
 	<-shouldFinish
-	log.Info("Time elapsed for " + strconv.FormatUint(counters.getGenerated(), 10) + " options: " + time.Since(timeStart).String() + " time tables generated and " + strconv.FormatUint(counters.getChecked(), 10) + " time tables checked")
-	log.Info("Best table:" + "\n")
-	log.Info(processingQueue.bestTable.String())
+	log.Info("Time limit reached, finished processing at: " + time.Now().Format("2006-01-02 15:04:05"))
+	log.Info("Total time taken: " + time.Since(timeStart).String())
+	log.Info("Generated options: " + strconv.FormatUint(counters.GeneratedOptions, 10) + ", checked options: " + strconv.FormatUint(counters.CheckedOptions, 10) + ", valid options: " + strconv.FormatUint(counters.ValidOptions, 10))
+	log.Info("Best table has score: " + strconv.Itoa(processingQueue.BestTable.Score))
+	log.Info("Best table: ")
+	println(processingQueue.BestTable.String())
+
 	var input string
 	log.Info("Press enter to exit")
 	_, _ = fmt.Scanln(&input)

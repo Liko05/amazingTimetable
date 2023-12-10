@@ -4,9 +4,9 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"math/rand"
-	"strconv"
 )
 
+// Subject is a struct that represents a subject
 type Subject struct {
 	Name        string
 	Teacher     string
@@ -15,12 +15,14 @@ type Subject struct {
 	Floor       int
 }
 
+// Table is a struct that represents a timetable
 type Table struct {
 	TimeTable [50]Subject
 	Score     int
 }
 
-func (tb *Table) createDefault() {
+// CreateDefault creates a default timetable with the current timetable
+func (tb *Table) CreateDefault() {
 	tb.TimeTable = [50]Subject{}
 	tb.Score = 0
 
@@ -279,29 +281,30 @@ func (tb *Table) createDefault() {
 	}
 }
 
-func (tb *Table) shuffle() {
-	// Fisher-Yates shuffle algorithm
+// Shuffle shuffles the timetable
+func (tb *Table) Shuffle() {
+	// Fisher-Yates Shuffle algorithm
 	for i := len(tb.TimeTable) - 1; i > 0; i-- {
 		j := rand.Intn(i + 1)
 		tb.TimeTable[i], tb.TimeTable[j] = tb.TimeTable[j], tb.TimeTable[i]
 	}
 }
 
-func (tb *Table) isClassEmpty(index int) bool {
-	return tb.TimeTable[index].Name == ""
-}
-
+// String returns a string representation of the timetable
 func (tb *Table) String() string {
 	var str string
-	for i := 0; i < len(tb.TimeTable); i++ {
-		str += "[ " + strconv.Itoa(i) + " : " + tb.TimeTable[i].Name + " ] "
-		if i%10 == 0 && i != 0 {
-			str += "\n"
+	dayIndex := 0
+	for i := 0; i < 5; i++ {
+		dayIndex = i * 10
+		for j := dayIndex; j <= dayIndex+9; j++ {
+			str += "[" + tb.TimeTable[j].Name + "]" + " "
 		}
+		str += "\n"
 	}
 	return str
 }
 
+// Hash returns a hash of the timetable
 func (tb *Table) Hash() string {
 	var hash string
 	for i := 0; i < len(tb.TimeTable); i++ {
