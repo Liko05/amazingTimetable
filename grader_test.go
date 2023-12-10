@@ -83,7 +83,7 @@ func TestGradeSubjectsInDay(t *testing.T) {
 		results[i] = tb.GradeSubjectsInDay(dayIndex)
 	}
 
-	expected := [5]int{400, 200, 400, 500, 500}
+	expected := [5]int{600, 100, 500, 800, 700}
 
 	for i := 0; i < 5; i++ {
 		if results[i] != expected[i] {

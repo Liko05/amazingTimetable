@@ -6,10 +6,11 @@ import (
 
 // ProcessingQueue is a thread safe Queue for storing time tables
 type ProcessingQueue struct {
-	Mu         sync.Mutex
-	Queue      []interface{}
-	BestTable  Table
-	BestTables []Table // left here just for debugging purposes
+	Mu            sync.Mutex
+	Queue         []interface{}
+	BestTable     Table
+	OriginalTable Table
+	BestTables    []Table // left here just for debugging purposes
 }
 
 // Push pushes an element to the queue
@@ -61,4 +62,16 @@ func (q *ProcessingQueue) AddToBestTables(element interface{}) {
 	}
 
 	q.BestTables = append(q.BestTables, table)
+}
+
+func (q *ProcessingQueue) AddOriginal(element interface{}) {
+	q.Mu.Lock()
+	defer q.Mu.Unlock()
+
+	table, ok := element.(Table)
+	if ok == false {
+		return
+	}
+
+	q.OriginalTable = table
 }

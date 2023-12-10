@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	log "github.com/sirupsen/logrus"
 	"os"
 	"strconv"
@@ -110,7 +109,15 @@ func main() {
 	log.Info("Best table: ")
 	println(processingQueue.BestTable.String())
 
-	var input string
-	log.Info("Press enter to exit")
-	_, _ = fmt.Scanln(&input)
+	if processingQueue.OriginalTable.Hash() == processingQueue.BestTable.Hash() {
+		log.Info("Best table is the original table")
+	} else {
+		log.Info("Original table: ")
+		println(processingQueue.OriginalTable.String())
+		log.Info("Original table score: " + strconv.Itoa(processingQueue.OriginalTable.Score))
+	}
+
+	//var input string
+	//log.Info("Press enter to exit")
+	//_, _ = fmt.Scanln(&input)
 }

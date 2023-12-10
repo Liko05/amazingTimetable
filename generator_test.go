@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+// Watch out for this test, it is very resource intensive
 func TestGenerator_GenerationWorkerStart(t *testing.T) {
 	shouldFinish := make(chan bool)
 	counters := ThreadSafeCounters{}
@@ -23,12 +24,12 @@ func TestGenerator_GenerationWorkerStart(t *testing.T) {
 	}
 	g := Generator{
 		Counters:        &counters,
-		NumberOfWorkers: 0,
+		NumberOfWorkers: 1,
 		ProcessingQueue: &processingQueue,
 	}
 
 	go watchdog.Start(time.Now())
-	go g.GenerationWorkerStart()
+	go g.Start()
 	<-shouldFinish
 
 	if counters.GetGenerated() <= 0 {

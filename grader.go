@@ -14,6 +14,11 @@ type Grader struct {
 
 // Start starts the grading of new timetables based on the NumberOfWorkers
 func (g *Grader) Start() {
+	defaultTb := Table{}
+	defaultTb.CreateDefault()
+	defaultTb.IsWeekReasonable()
+	g.ProcessingQueue.AddOriginal(defaultTb)
+	g.ProcessingQueue.AddIfBetter(defaultTb)
 	for i := 0; i < g.NumberOfWorkers; i++ {
 		go g.GradeTimeTablesStartWorker()
 	}
@@ -32,6 +37,7 @@ func (g *Grader) GradeTimeTablesStartWorker() {
 		if table.IsWeekReasonable() {
 			g.Counters.IncrementValid()
 			g.ProcessingQueue.AddIfBetter(table)
+			g.ProcessingQueue.AddToBestTables(table)
 		}
 		g.Counters.IncrementChecked()
 	}
@@ -152,6 +158,12 @@ func (tb *Table) GradeSubjectsInDay(dayIndex int) int {
 				finalScore += 100
 			} else {
 				finalScore -= 100
+			}
+		} else {
+			if i-dayIndex < 6 {
+				finalScore -= 200
+			} else {
+				finalScore += 100
 			}
 		}
 	}

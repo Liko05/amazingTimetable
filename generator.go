@@ -13,9 +13,6 @@ type Generator struct {
 
 // Start starts the generation of new timetables based on the NumberOfWorkers
 func (g *Generator) Start() {
-	initTable := Table{}
-	initTable.CreateDefault()
-	g.ProcessingQueue.Push(initTable)
 	for i := 0; i < g.NumberOfWorkers; i++ {
 		go g.GenerationWorkerStart()
 	}
