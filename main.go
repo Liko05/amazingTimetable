@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	log "github.com/sirupsen/logrus"
 	"os"
 	"strconv"
@@ -57,8 +58,8 @@ func GetArgsAndApplyArgs(watchdog *Watchdog, generators *Generator, graders *Gra
 
 	flag.IntVar(&timeLimit, "t", 180, "The time limit in seconds")
 	flag.IntVar(&timeBetweenProgressUpdates, "p", 10, "The time between progress updates in seconds")
-	flag.IntVar(&numberOfGenerators, "g", 7, "The number of generators")
-	flag.IntVar(&numberOfGraders, "r", 12, "The number of graders")
+	flag.IntVar(&numberOfGenerators, "g", 3, "The number of generators")
+	flag.IntVar(&numberOfGraders, "r", 3, "The number of graders")
 	flag.BoolVar(&debugLevel, "d", false, "Enable debug level logging")
 	flag.BoolVar(&help, "h", false, "Show help")
 
@@ -117,7 +118,7 @@ func main() {
 		log.Info("Original table score: " + strconv.Itoa(processingQueue.OriginalTable.Score))
 	}
 
-	//var input string
-	//log.Info("Press enter to exit")
-	//_, _ = fmt.Scanln(&input)
+	var input string
+	log.Info("Press enter to exit")
+	_, _ = fmt.Scanln(&input)
 }
