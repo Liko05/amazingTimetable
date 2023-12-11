@@ -61,7 +61,10 @@ func (q *ProcessingQueue) AddToBestTables(element interface{}) {
 		return
 	}
 
+	//if table.Hash() != q.OriginalTable.Hash() && table.Score > q.OriginalTable.Score {
 	q.BestTables = append(q.BestTables, table)
+	//}
+
 }
 
 func (q *ProcessingQueue) AddOriginal(element interface{}) {

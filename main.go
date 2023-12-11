@@ -107,6 +107,7 @@ func main() {
 	log.Info("Total time taken: " + time.Since(timeStart).String())
 	log.Info("Generated options: " + strconv.FormatUint(counters.GeneratedOptions, 10) + ", checked options: " + strconv.FormatUint(counters.CheckedOptions, 10) + ", valid options: " + strconv.FormatUint(counters.ValidOptions, 10))
 	log.Info("Best table has score: " + strconv.Itoa(processingQueue.BestTable.Score))
+	log.Info(strconv.Itoa(len(processingQueue.BestTables)) + "were better than the original table with a score of: " + strconv.Itoa(processingQueue.OriginalTable.Score))
 	log.Info("Best table: ")
 	println(processingQueue.BestTable.String())
 

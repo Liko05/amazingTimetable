@@ -124,9 +124,9 @@ func (tb *Table) LegalityOfTheDay(dayIndex int) int {
 
 // IsPracticalSubjectConnecting iterates through the day and if it finds a practical subject it checks whether there is an adjacent practical subject in the same day or not.
 func (tb *Table) IsPracticalSubjectConnecting(dayIndex int) bool {
-	for i := dayIndex; i < dayIndex+9; i++ {
+	for i := dayIndex; i <= dayIndex+9; i++ {
 		currentSubject := tb.TimeTable[i]
-		if i-dayIndex != 0 && i != dayIndex+9 {
+		if i-dayIndex != 0 && i < dayIndex+9 {
 			if !currentSubject.IsPractical {
 				continue
 			}
