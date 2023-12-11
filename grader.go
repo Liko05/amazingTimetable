@@ -124,25 +124,28 @@ func (tb *Table) LegalityOfTheDay(dayIndex int) int {
 
 // IsPracticalSubjectConnecting iterates through the day and if it finds a practical subject it checks whether there is an adjacent practical subject in the same day or not.
 func (tb *Table) IsPracticalSubjectConnecting(dayIndex int) bool {
-	for i := dayIndex; i <= dayIndex+9; i++ {
+	for i := dayIndex; i < dayIndex+9; i++ {
 		currentSubject := tb.TimeTable[i]
-		if i-dayIndex != 0 && i < dayIndex+9 {
-			if !currentSubject.IsPractical {
-				continue
-			}
-			previousSubject := tb.TimeTable[i-1]
-			upcomingSubject := tb.TimeTable[i+1]
-			isOkay := false
+		if currentSubject.IsPractical {
+			if i-dayIndex != 0 && i-dayIndex != 9 {
+				if (tb.TimeTable[i-1].IsPractical && currentSubject.Name == tb.TimeTable[i-1].Name) || (tb.TimeTable[i+1].IsPractical && currentSubject.Name == tb.TimeTable[i+1].Name) {
+					continue
+				} else {
+					return false
+				}
+			} else if i-dayIndex == 0 {
+				if tb.TimeTable[i+1].IsPractical && currentSubject.Name == tb.TimeTable[i+1].Name {
+					continue
+				} else {
+					return false
+				}
+			} else if i-dayIndex == 9 {
+				if tb.TimeTable[i-1].IsPractical && currentSubject.Name == tb.TimeTable[i-1].Name {
+					continue
+				} else {
+					return false
+				}
 
-			if previousSubject.Name == currentSubject.Name && previousSubject.IsPractical {
-				isOkay = true
-			}
-			if upcomingSubject.Name == currentSubject.Name && upcomingSubject.IsPractical {
-				isOkay = true
-			}
-
-			if isOkay == false {
-				return false
 			}
 		}
 	}

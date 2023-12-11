@@ -119,6 +119,10 @@ func main() {
 		log.Info("Original table score: " + strconv.Itoa(processingQueue.OriginalTable.Score))
 	}
 
+	for _, table := range processingQueue.BestTables {
+		println(table.String())
+		println("\n")
+	}
 	var input string
 	log.Info("Press enter to exit")
 	_, _ = fmt.Scanln(&input)
