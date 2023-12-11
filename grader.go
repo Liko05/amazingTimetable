@@ -48,13 +48,17 @@ func (g *Grader) GradeTimeTablesStartWorker() {
 // If the week is not reasonable it returns false and goes back to checking new timetable
 func (tb *Table) IsWeekReasonable() bool {
 	dayIndex := 0
+	if !tb.IsPracticalSubjectConnecting() {
+		return false
+	}
+	log.Info("Passed practical")
 	for i := 0; i < 5; i++ {
 		dayIndex = i * 10
-
 		//mandatory rules which might return early so we dont waste resources
 		tb.Score += tb.LunchBreaks(dayIndex)
 		tb.Score += tb.LegalityOfTheDay(dayIndex)
-		if !tb.IsPracticalSubjectConnecting(dayIndex) || tb.Score < -20000 {
+
+		if tb.Score < -150000 {
 			return false
 		}
 
@@ -123,29 +127,24 @@ func (tb *Table) LegalityOfTheDay(dayIndex int) int {
 }
 
 // IsPracticalSubjectConnecting iterates through the day and if it finds a practical subject it checks whether there is an adjacent practical subject in the same day or not.
-func (tb *Table) IsPracticalSubjectConnecting(dayIndex int) bool {
-	for i := dayIndex; i < dayIndex+9; i++ {
-		currentSubject := tb.TimeTable[i]
-		if currentSubject.IsPractical {
-			if i-dayIndex != 0 && i-dayIndex != 9 {
-				if (tb.TimeTable[i-1].IsPractical && currentSubject.Name == tb.TimeTable[i-1].Name) || (tb.TimeTable[i+1].IsPractical && currentSubject.Name == tb.TimeTable[i+1].Name) {
-					continue
-				} else {
-					return false
+func (tb *Table) IsPracticalSubjectConnecting() bool {
+	for day := 0; day < 5; day++ {
+		for period := 0; period < 10; period++ {
+			currentSubject := tb.TimeTable[day*10+period]
+			if currentSubject.IsPractical {
+				if period < 9 {
+					rightSubject := tb.TimeTable[day*10+period+1]
+					if rightSubject.IsPractical && rightSubject.Name == currentSubject.Name {
+						continue
+					}
 				}
-			} else if i-dayIndex == 0 {
-				if tb.TimeTable[i+1].IsPractical && currentSubject.Name == tb.TimeTable[i+1].Name {
-					continue
-				} else {
-					return false
+				if period > 0 {
+					leftSubject := tb.TimeTable[day*10+period-1]
+					if leftSubject.IsPractical && leftSubject.Name == currentSubject.Name {
+						continue
+					}
 				}
-			} else if i-dayIndex == 9 {
-				if tb.TimeTable[i-1].IsPractical && currentSubject.Name == tb.TimeTable[i-1].Name {
-					continue
-				} else {
-					return false
-				}
-
+				return false
 			}
 		}
 	}

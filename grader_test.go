@@ -8,21 +8,10 @@ func TestIsPracticalSubjectConnecting(t *testing.T) {
 	tb := Table{}
 	tb.CreateDefault()
 
-	dayIndex := 0
+	result := tb.IsPracticalSubjectConnecting()
 
-	results := [5]bool{}
-
-	for i := 0; i < 5; i++ {
-		dayIndex = i * 10
-		results[i] = tb.IsPracticalSubjectConnecting(dayIndex)
-	}
-
-	expected := [5]bool{true, true, true, true, true}
-
-	for i := 0; i < 5; i++ {
-		if results[i] != expected[i] {
-			t.Errorf("IsPracticalSubjectConnecting(%v) = %v, want %v", dayIndex, results[i], expected[i])
-		}
+	if !result {
+		t.Errorf("IsPracticalSubjectConnecting() = %v, want %v", result, true)
 	}
 }
 
