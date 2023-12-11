@@ -7,10 +7,10 @@
 - List of available command line arguments can be found by running the program with the argument `-h`
 ````
   -d        Enable debug level logging
-  -g int    The number of generators (default 7)
+  -g int    The number of generators (default 3)
   -h        Show help
   -p int    The time between progress updates in seconds (default 10)
-  -r int    The number of graders (default 12)
+  -r int    The number of graders (default 3)
   -t int    The time limit in seconds (default 180)
   ````
 ## How to build
