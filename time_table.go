@@ -1,16 +1,15 @@
 package main
 
 import (
-	"crypto/md5"
-	"encoding/hex"
+	"github.com/spaolacci/murmur3"
 	"math/rand"
 )
 
 // Subject is a struct that represents a subject
 type Subject struct {
-	Name    string
-	Teacher string
-	Room    string
+	Name    uint8
+	Teacher uint8
+	Room    uint8
 	Floor   uint8
 }
 
@@ -26,290 +25,242 @@ func (tb *Table) CreateDefault() {
 	tb.Score = 0
 
 	tb.TimeTable[0] = Subject{
-		Name:        "TP",
-		Teacher:     "No",
-		Room:        "23",
-		IsPractical: false,
-		Floor:       4,
+		Name:    101,
+		Teacher: 1,
+		Room:    1,
+		Floor:   4,
 	}
 	tb.TimeTable[1] = Subject{
-		Name:        "AM",
-		Teacher:     "Rk",
-		Room:        "23",
-		IsPractical: false,
-		Floor:       4,
+		Name:    2,
+		Teacher: 2,
+		Room:    1,
+		Floor:   4,
 	}
 	tb.TimeTable[2] = Subject{
-		Name:        "A",
-		Teacher:     "Jz",
-		Room:        "23",
-		IsPractical: false,
-		Floor:       4,
+		Name:    3,
+		Teacher: 3,
+		Room:    1,
+		Floor:   4,
 	}
 	tb.TimeTable[3] = Subject{
-		Name:        "M",
-		Teacher:     "Hr",
-		Room:        "23",
-		IsPractical: false,
-		Floor:       4,
+		Name:    4,
+		Teacher: 4,
+		Room:    1,
+		Floor:   4,
 	}
 	tb.TimeTable[4] = Subject{
-		Name:        "M",
-		Teacher:     "Hr",
-		Room:        "23",
-		IsPractical: false,
-		Floor:       4,
+		Name:    4,
+		Teacher: 4,
+		Room:    1,
+		Floor:   4,
 	}
 	tb.TimeTable[5] = Subject{
-		Name:        "PIS",
-		Teacher:     "Bc",
-		Room:        "23",
-		IsPractical: false,
-		Floor:       4,
+		Name:    5,
+		Teacher: 5,
+		Room:    1,
+		Floor:   4,
 	}
 
 	tb.TimeTable[7] = Subject{
-		Name:        "DS",
-		Teacher:     "Vc",
-		Room:        "19c",
-		IsPractical: true,
-		Floor:       3,
+		Name:    106,
+		Teacher: 6,
+		Room:    2,
+		Floor:   3,
 	}
 	tb.TimeTable[8] = Subject{
-		Name:        "DS",
-		Teacher:     "Vc",
-		Room:        "19c",
-		IsPractical: true,
-		Floor:       3,
+		Name:    106,
+		Teacher: 6,
+		Room:    2,
+		Floor:   3,
 	}
 	tb.TimeTable[10] = Subject{
-		Name:        "M",
-		Teacher:     "Hr",
-		Room:        "23",
-		IsPractical: false,
-		Floor:       4,
+		Name:    4,
+		Teacher: 4,
+		Room:    1,
+		Floor:   4,
 	}
 
 	tb.TimeTable[11] = Subject{
-		Name:        "A",
-		Teacher:     "Jz",
-		Room:        "29",
-		IsPractical: false,
-		Floor:       4,
+		Name:    3,
+		Teacher: 3,
+		Room:    3,
+		Floor:   4,
 	}
 	tb.TimeTable[12] = Subject{
-		Name:        "CIT",
-		Teacher:     "Sv",
-		Room:        "17b",
-		IsPractical: true,
-		Floor:       3,
+		Name:    107,
+		Teacher: 7,
+		Room:    4,
+		Floor:   3,
 	}
 	tb.TimeTable[13] = Subject{
-		Name:        "CIT",
-		Teacher:     "Sv",
-		Room:        "17b",
-		IsPractical: true,
-		Floor:       3,
+		Name:    107,
+		Teacher: 7,
+		Room:    4,
+		Floor:   3,
 	}
 
 	tb.TimeTable[15] = Subject{
-		Name:        "C",
-		Teacher:     "Mr",
-		Room:        "23",
-		IsPractical: false,
-		Floor:       4,
+		Name:    8,
+		Teacher: 8,
+		Room:    1,
+		Floor:   4,
 	}
 	tb.TimeTable[16] = Subject{
-		Name:        "PV",
-		Teacher:     "Re",
-		Room:        "18a",
-		IsPractical: true,
-		Floor:       3,
+		Name:    112,
+		Teacher: 9,
+		Room:    5,
+		Floor:   3,
 	}
 
 	tb.TimeTable[17] = Subject{
-		Name:        "PV",
-		Teacher:     "Re",
-		Room:        "18a",
-		IsPractical: true,
-		Floor:       3,
+		Name:    112,
+		Teacher: 9,
+		Room:    5,
+		Floor:   3,
 	}
 	tb.TimeTable[18] = Subject{
-		Name:        "TV",
-		Teacher:     "Lc",
-		Room:        "TV",
-		IsPractical: false,
-		Floor:       0,
+		Name:    9,
+		Teacher: 10,
+		Room:    6,
+		Floor:   0,
 	}
 
 	tb.TimeTable[21] = Subject{
-		Name:        "A",
-		Teacher:     "Jz",
-		Room:        "23",
-		IsPractical: false,
-		Floor:       4,
+		Name:    3,
+		Teacher: 3,
+		Room:    1,
+		Floor:   4,
 	}
 	tb.TimeTable[22] = Subject{
-		Name:        "C",
-		Teacher:     "Mr",
-		Room:        "23",
-		IsPractical: false,
-		Floor:       4,
+		Name:    8,
+		Teacher: 8,
+		Room:    1,
+		Floor:   4,
 	}
 
 	tb.TimeTable[23] = Subject{
-		Name:        "WA",
-		Teacher:     "Ad",
-		Room:        "23",
-		IsPractical: false,
-		Floor:       4,
+		Name:    10,
+		Teacher: 11,
+		Room:    1,
+		Floor:   4,
 	}
 
 	tb.TimeTable[24] = Subject{
-		Name:        "DS",
-		Teacher:     "Vc",
-		Room:        "23",
-		IsPractical: false,
-		Floor:       4,
+		Name:    6,
+		Teacher: 6,
+		Room:    1,
+		Floor:   4,
 	}
 
 	tb.TimeTable[25] = Subject{
-		Name:        "PSS",
-		Teacher:     "Mo",
-		Room:        "8a",
-		IsPractical: true,
-		Floor:       2,
+		Name:    111,
+		Teacher: 12,
+		Room:    7,
+		Floor:   2,
 	}
 
 	tb.TimeTable[26] = Subject{
-		Name:        "PSS",
-		Teacher:     "Mo",
-		Room:        "8a",
-		IsPractical: true,
-		Floor:       2,
+		Name:    111,
+		Teacher: 12,
+		Room:    7,
+		Floor:   2,
 	}
 
 	tb.TimeTable[30] = Subject{
-		Name:        "WA",
-		Teacher:     "Na",
-		Room:        "19b",
-		IsPractical: true,
-		Floor:       3,
+		Name:    110,
+		Teacher: 13,
+		Room:    8,
+		Floor:   3,
 	}
 
 	tb.TimeTable[31] = Subject{
-		Name:        "WA",
-		Teacher:     "Na",
-		Room:        "19b",
-		IsPractical: true,
-		Floor:       3,
+		Name:    110,
+		Teacher: 13,
+		Room:    8,
+		Floor:   3,
 	}
 
 	tb.TimeTable[32] = Subject{
-		Name:        "M",
-		Teacher:     "Hr",
-		Room:        "23",
-		IsPractical: false,
-		Floor:       4,
+		Name:    4,
+		Teacher: 4,
+		Room:    1,
+		Floor:   4,
 	}
 
 	tb.TimeTable[33] = Subject{
-		Name:        "A",
-		Teacher:     "Jz",
-		Room:        "23",
-		IsPractical: false,
-		Floor:       4,
+		Name:    3,
+		Teacher: 3,
+		Room:    1,
+		Floor:   4,
 	}
 
 	tb.TimeTable[34] = Subject{
-		Name:        "PV",
-		Teacher:     "Re",
-		Room:        "23",
-		IsPractical: false,
-		Floor:       4,
+		Name:    12,
+		Teacher: 9,
+		Room:    1,
+		Floor:   4,
 	}
 	tb.TimeTable[35] = Subject{
-		Name:        "PIS",
-		Teacher:     "Bc",
-		Room:        "19a",
-		IsPractical: true,
-		Floor:       3,
+		Name:    105,
+		Teacher: 5,
+		Room:    9,
+		Floor:   3,
 	}
 	tb.TimeTable[36] = Subject{
-		Name:        "PIS",
-		Teacher:     "Bc",
-		Room:        "19a",
-		IsPractical: true,
-		Floor:       3,
+		Name:    105,
+		Teacher: 5,
+		Room:    9,
+		Floor:   3,
 	}
 
 	tb.TimeTable[41] = Subject{
-		Name:        "C",
-		Teacher:     "Mr",
-		Room:        "23",
-		IsPractical: false,
-		Floor:       4,
+		Name:    8,
+		Teacher: 8,
+		Room:    1,
+		Floor:   4,
 	}
 	tb.TimeTable[42] = Subject{
-		Name:        "PSS",
-		Teacher:     "Ms",
-		Room:        "23",
-		IsPractical: false,
-		Floor:       4,
+		Name:    11,
+		Teacher: 14,
+		Room:    1,
+		Floor:   4,
 	}
 	tb.TimeTable[43] = Subject{
-		Name:        "AM",
-		Teacher:     "Rk",
-		Room:        "23",
-		IsPractical: false,
-		Floor:       4,
+		Name:    2,
+		Teacher: 2,
+		Room:    1,
+		Floor:   4,
 	}
 	tb.TimeTable[44] = Subject{
-		Name:        "PIS",
-		Teacher:     "Bc",
-		Room:        "23",
-		IsPractical: false,
-		Floor:       4,
+		Name:    5,
+		Teacher: 5,
+		Room:    1,
+		Floor:   4,
 	}
 	tb.TimeTable[45] = Subject{
-		Name:        "TV",
-		Teacher:     "Lc",
-		Room:        "TV",
-		IsPractical: false,
-		Floor:       0,
+		Name:    9,
+		Teacher: 10,
+		Room:    6,
+		Floor:   0,
 	}
 }
 
 // Shuffle shuffles the timetable
 func (tb *Table) Shuffle() {
-	// Fisher-Yates Shuffle algorithm
 	for i := len(tb.TimeTable) - 1; i > 0; i-- {
 		j := rand.Intn(i + 1)
 		tb.TimeTable[i], tb.TimeTable[j] = tb.TimeTable[j], tb.TimeTable[i]
 	}
 }
 
-// String returns a string representation of the timetable
-func (tb *Table) String() string {
-	var str string
-	dayIndex := 0
-	for i := 0; i < 5; i++ {
-		dayIndex = i * 10
-		for j := dayIndex; j <= dayIndex+9; j++ {
-			str += "[" + tb.TimeTable[j].Name + "]" + " "
-		}
-		str += "\n"
-	}
-	return str
-}
-
-// Hash returns a hash of the timetable
-func (tb *Table) Hash() string {
-	var hash string
+// Hash returns a hash of the timetable using the murmur3 algorithm
+func (tb *Table) Hash() uint32 {
+	hash := murmur3.New32()
 	for i := 0; i < len(tb.TimeTable); i++ {
-		hash += tb.TimeTable[i].Name
+		_, err := hash.Write([]byte{tb.TimeTable[i].Name})
+		if err != nil {
+			return 0
+		}
 	}
-
-	mfhash := md5.Sum([]byte(hash))
-	return hex.EncodeToString(mfhash[:])
+	return hash.Sum32()
 }

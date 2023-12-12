@@ -1,14 +1,11 @@
 package main
 
-import (
-	log "github.com/sirupsen/logrus"
-)
-
 // Generator is responsible for running the generation of new timetables
 type Generator struct {
 	Counters        *ThreadSafeCounters
 	NumberOfWorkers int
 	ProcessingQueue *ProcessingQueue
+	ShouldFinish    chan bool
 }
 
 // Start starts the generation of new timetables based on the NumberOfWorkers
@@ -23,10 +20,14 @@ func (g *Generator) GenerationWorkerStart() {
 	defaultTimeTable := Table{}
 	defaultTimeTable.CreateDefault()
 	for {
-		log.Debug("Generating new time table")
-		defaultTimeTable.Shuffle()
-		g.ProcessingQueue.Push(defaultTimeTable)
-		g.Counters.IncrementGenerated()
-		log.Debug("Generating again")
+		select {
+		case <-g.ShouldFinish:
+			println(g.ProcessingQueue.Hashes[defaultTimeTable.Hash()])
+			return
+		default:
+			defaultTimeTable.Shuffle()
+			g.ProcessingQueue.AddHash(defaultTimeTable.Hash())
+			g.Counters.IncrementGenerated()
+		}
 	}
 }

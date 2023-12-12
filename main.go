@@ -4,7 +4,6 @@ import (
 	"flag"
 	log "github.com/sirupsen/logrus"
 	"os"
-	//"os/signal"
 	"runtime"
 	"strconv"
 	"sync"
@@ -22,14 +21,12 @@ func CreateVariablesForWorkers() (chan bool, *ThreadSafeCounters, *ProcessingQue
 		OptionsBetterThanDefault: 0,
 	}
 	var processingQueue = ProcessingQueue{
-		Mu:    sync.Mutex{},
-		Queue: make([]interface{}, 0),
+		Mu: sync.Mutex{},
 		BestTable: Table{
 			Score: -10000,
 		},
-		BestTables:         make([]Table, 0),
 		ThreadSafeCounters: &counters,
-		Hashes:             make(map[Table]bool),
+		Hashes:             make(map[uint32]bool),
 	}
 	return shouldFinish, &counters, &processingQueue
 }
@@ -64,7 +61,7 @@ func GetArgsAndApplyArgs(watchdog *Watchdog, generators *Generator, graders *Gra
 
 	flag.IntVar(&timeLimit, "t", 180, "The time limit in seconds")
 	flag.IntVar(&timeBetweenProgressUpdates, "p", 10, "The time between progress updates in seconds")
-	flag.IntVar(&numberOfGenerators, "g", numberOfAvailableCPUs/2, "The number of generators")
+	flag.IntVar(&numberOfGenerators, "g", numberOfAvailableCPUs-1, "The number of generators")
 	flag.IntVar(&numberOfGraders, "r", numberOfAvailableCPUs/2, "The number of graders")
 	flag.BoolVar(&debugLevel, "d", false, "Enable debug level logging")
 	flag.BoolVar(&help, "h", false, "Show help")
@@ -91,7 +88,6 @@ func GetArgsAndApplyArgs(watchdog *Watchdog, generators *Generator, graders *Gra
 	watchdog.DelayBetweenProgressUpdates = timeBetweenProgressUpdates
 
 	generators.NumberOfWorkers = numberOfGenerators
-	graders.NumberOfWorkers = numberOfGraders
 
 	log.Info("Starting with time limit: " + strconv.Itoa(timeLimit) + " seconds")
 }
@@ -101,17 +97,17 @@ func TimeLimit(processingQueue *ProcessingQueue, counters *ThreadSafeCounters, t
 	log.Info("Time limit reached, finished processing at: " + time.Now().Format("2006-01-02 15:04:05"))
 	log.Info("Total time taken: " + time.Since(timeStart).String())
 	log.Info("Generated options: " + strconv.FormatUint(counters.GeneratedOptions, 10) + ", checked options: " + strconv.FormatUint(counters.CheckedOptions, 10) + ", valid options: " + strconv.FormatUint(counters.ValidOptions, 10))
-	log.Info("Best table has score: " + strconv.Itoa(processingQueue.BestTable.Score))
-	log.Info(strconv.FormatUint(counters.OptionsBetterThanDefault, 10) + "were better than the original table with a score of: " + strconv.Itoa(processingQueue.OriginalTable.Score))
+	//log.Info("Best table has score: " + strconv.Itoa(processingQueue.BestTable.Score))
+	//log.Info(strconv.FormatUint(counters.OptionsBetterThanDefault, 10) + "were better than the original table with a score of: " + strconv.Itoa(processingQueue.OriginalTable.Score))
 	log.Info("Best table: ")
-	println(processingQueue.BestTable.String())
+	//println(processingQueue.BestTable.String())
 
 	if processingQueue.OriginalTable.Hash() == processingQueue.BestTable.Hash() {
 		log.Info("Best table is the original table")
 	} else {
 		log.Info("Original table: ")
-		println(processingQueue.OriginalTable.String())
-		log.Info("Original table score: " + strconv.Itoa(processingQueue.OriginalTable.Score))
+		//println(processingQueue.OriginalTable.String())
+		//log.Info("Original table score: " + strconv.Itoa(processingQueue.OriginalTable.Score))
 	}
 }
 
@@ -121,10 +117,10 @@ func Interrupt(processingQueue *ProcessingQueue, counters *ThreadSafeCounters, t
 	log.Info("Interrupted processing at: " + time.Now().Format("2006-01-02 15:04:05"))
 	log.Info("Total time taken: " + time.Since(timeStart).String())
 	log.Info("Generated options: " + strconv.FormatUint(counters.GeneratedOptions, 10) + ", checked options: " + strconv.FormatUint(counters.CheckedOptions, 10) + ", valid options: " + strconv.FormatUint(counters.ValidOptions, 10))
-	log.Info("Best table has score: " + strconv.Itoa(processingQueue.BestTable.Score))
-	log.Info(strconv.Itoa(len(processingQueue.BestTables)) + "were better than the original table with a score of: " + strconv.Itoa(processingQueue.OriginalTable.Score))
+	//log.Info("Best table has score: " + strconv.Itoa(processingQueue.BestTable.Score))
+	//log.Info(strconv.Itoa(len(processingQueue.BestTables)) + "were better than the original table with a score of: " + strconv.Itoa(processingQueue.OriginalTable.Score))
 	log.Info("Best table: ")
-	println(processingQueue.BestTable.String())
+	//println(processingQueue.BestTable.String())
 	os.Exit(1)
 }
 
@@ -134,19 +130,12 @@ func main() {
 	watchdog, generators, graders := CreateWorkers(shouldFinish, counters, processingQueue)
 	GetArgsAndApplyArgs(&watchdog, &generators, &graders)
 
-	log.Info("Go Max Procs: " + strconv.Itoa(runtime.GOMAXPROCS(0)))
-
-	//c := make(chan os.Signal, 1)
-	//signal.Notify(c, os.Interrupt)
-
 	timeStart := time.Now()
 
-	//go Interrupt(processingQueue, counters, timeStart, c)
 	watchdog.Start(timeStart)
 	generators.Start()
-	graders.Start()
+	//graders.Start()
 
 	<-shouldFinish
 	TimeLimit(processingQueue, counters, timeStart)
-
 }
