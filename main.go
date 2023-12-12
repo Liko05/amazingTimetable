@@ -4,6 +4,7 @@ import (
 	"flag"
 	log "github.com/sirupsen/logrus"
 	"os"
+	"runtime"
 	"strconv"
 	"sync"
 	"time"
@@ -56,10 +57,12 @@ func GetArgsAndApplyArgs(watchdog *Watchdog, generators *Generator, graders *Gra
 	var debugLevel bool
 	var help bool
 
+	numberOfAvailableCPUs := runtime.NumCPU()
+
 	flag.IntVar(&timeLimit, "t", 180, "The time limit in seconds")
 	flag.IntVar(&timeBetweenProgressUpdates, "p", 10, "The time between progress updates in seconds")
-	flag.IntVar(&numberOfGenerators, "g", 3, "The number of generators")
-	flag.IntVar(&numberOfGraders, "r", 3, "The number of graders")
+	flag.IntVar(&numberOfGenerators, "g", numberOfAvailableCPUs/2, "The number of generators")
+	flag.IntVar(&numberOfGraders, "r", numberOfAvailableCPUs/2, "The number of graders")
 	flag.BoolVar(&debugLevel, "d", false, "Enable debug level logging")
 	flag.BoolVar(&help, "h", false, "Show help")
 
@@ -79,6 +82,7 @@ func GetArgsAndApplyArgs(watchdog *Watchdog, generators *Generator, graders *Gra
 	} else {
 		InitLogger(log.InfoLevel)
 	}
+	log.Info("Number of available CPUs: " + strconv.Itoa(numberOfAvailableCPUs))
 
 	watchdog.DesiredDuration = timeLimit
 	watchdog.DelayBetweenProgressUpdates = timeBetweenProgressUpdates
