@@ -8,17 +8,16 @@ import (
 
 // Subject is a struct that represents a subject
 type Subject struct {
-	Name        string
-	Teacher     string
-	Room        string
-	IsPractical bool
-	Floor       int
+	Name    string
+	Teacher string
+	Room    string
+	Floor   uint8
 }
 
 // Table is a struct that represents a timetable
 type Table struct {
 	TimeTable [50]Subject
-	Score     int
+	Score     int32
 }
 
 // CreateDefault creates a default timetable with the current timetable
