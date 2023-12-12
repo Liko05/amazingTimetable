@@ -26,8 +26,7 @@ func CreateVariablesForWorkers() (chan bool, *ThreadSafeCounters, *ProcessingQue
 		BestTable: Table{
 			Score: -10000,
 		},
-		BestTables:   make([]Table, 0),
-		ShouldFinish: &shouldFinish,
+		BestTables: make([]Table, 0),
 	}
 	return shouldFinish, &counters, &processingQueue
 }
