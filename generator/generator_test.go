@@ -1,6 +1,10 @@
-package main
+package generator
 
 import (
+	"amazingTimetable/counter"
+	"amazingTimetable/processing"
+	"amazingTimetable/table"
+	"amazingTimetable/watchdog"
 	"sync"
 	"testing"
 	"time"
@@ -9,14 +13,14 @@ import (
 // Watch out for this test, it is very resource intensive
 func TestGenerator_GenerationWorkerStart(t *testing.T) {
 	shouldFinish := make(chan bool)
-	counters := ThreadSafeCounters{}
-	processingQueue := ProcessingQueue{
+	counters := counter.ThreadSafeCounters{}
+	processingQueue := processing.ProcessingQueue{
 		Mu:         sync.Mutex{},
 		Queue:      make([]interface{}, 0),
-		BestTable:  Table{},
-		BestTables: make([]Table, 0),
+		BestTable:  table.Table{},
+		BestTables: make([]table.Table, 0),
 	}
-	watchdog := Watchdog{
+	watchdog := watchdog.Watchdog{
 		DesiredDuration:             5,
 		DelayBetweenProgressUpdates: 100,
 		ShouldFinish:                shouldFinish,

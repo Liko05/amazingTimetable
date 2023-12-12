@@ -1,15 +1,17 @@
-package main
+package processing
 
 import (
+	"amazingTimetable/counter"
+	"amazingTimetable/table"
 	"sync"
 )
 
 // ProcessingQueue is a thread safe Queue for storing time tables
 type ProcessingQueue struct {
 	Mu                 sync.Mutex
-	BestTable          Table
-	OriginalTable      Table
-	ThreadSafeCounters *ThreadSafeCounters
+	BestTable          table.Table
+	OriginalTable      table.Table
+	ThreadSafeCounters *counter.ThreadSafeCounters
 	Hashes             map[uint32]bool
 }
 
@@ -18,7 +20,7 @@ func (q *ProcessingQueue) AddIfBetter(element interface{}) {
 	q.Mu.Lock()
 	defer q.Mu.Unlock()
 
-	table, ok := element.(Table)
+	table, ok := element.(table.Table)
 	if ok == false {
 		return
 	}
@@ -40,7 +42,7 @@ func (q *ProcessingQueue) AddOriginal(element interface{}) {
 	q.Mu.Lock()
 	defer q.Mu.Unlock()
 
-	table, ok := element.(Table)
+	table, ok := element.(table.Table)
 	if ok == false {
 		return
 	}

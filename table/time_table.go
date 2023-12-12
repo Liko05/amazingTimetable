@@ -1,4 +1,4 @@
-package main
+package table
 
 import (
 	"github.com/spaolacci/murmur3"
@@ -263,4 +263,19 @@ func (tb *Table) Hash() uint32 {
 		}
 	}
 	return hash.Sum32()
+}
+
+func (tb *Table) CheckConsecutiveClasses() bool {
+	for days := 0; days < 5; days++ {
+		for hours := 1; hours < 10; hours++ {
+			if tb.TimeTable[days*10+hours].Name < 100 {
+				continue
+			}
+
+			if tb.TimeTable[days*10+hours-1].Name != tb.TimeTable[days*10+hours].Name && tb.TimeTable[days*10+hours+1].Name != tb.TimeTable[days*10+hours].Name {
+				return false
+			}
+		}
+	}
+	return true
 }

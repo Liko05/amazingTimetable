@@ -1,6 +1,7 @@
-package main
+package processing
 
 import (
+	"amazingTimetable/table"
 	"testing"
 )
 
@@ -37,9 +38,9 @@ func TestProcessingQueue_Pop(t *testing.T) {
 
 func TestProcessingQueue_AddIfBetter(t *testing.T) {
 	q := ProcessingQueue{}
-	q.BestTable = Table{Score: 1}
-	q.AddIfBetter(Table{Score: 2})
-	q.AddIfBetter(Table{Score: 3})
+	q.BestTable = table.Table{Score: 1}
+	q.AddIfBetter(table.Table{Score: 2})
+	q.AddIfBetter(table.Table{Score: 3})
 
 	if q.BestTable.Score != 3 {
 		t.Errorf("Expected BestTable.Score to be 3, but got %d", q.BestTable.Score)
@@ -48,7 +49,7 @@ func TestProcessingQueue_AddIfBetter(t *testing.T) {
 
 func TestProcessingQueue_AddToBestTables(t *testing.T) {
 	q := ProcessingQueue{}
-	table1, table2, table3 := Table{Score: 1}, Table{Score: 2}, Table{Score: 3}
+	table1, table2, table3 := table.Table{Score: 1}, table.Table{Score: 2}, table.Table{Score: 3}
 	table1.CreateDefault()
 	table1.Shuffle()
 
@@ -69,9 +70,9 @@ func TestProcessingQueue_AddToBestTables(t *testing.T) {
 
 func TestProcessingQueue_AddToBestTablesFailsOnMatchingHashes(t *testing.T) {
 	q := ProcessingQueue{}
-	q.AddToBestTables(Table{Score: 1})
-	q.AddToBestTables(Table{Score: 2})
-	q.AddToBestTables(Table{Score: 3})
+	q.AddToBestTables(table.Table{Score: 1})
+	q.AddToBestTables(table.Table{Score: 2})
+	q.AddToBestTables(table.Table{Score: 3})
 
 	if len(q.BestTables) != 1 {
 		t.Errorf("Expected BestTables length to be 1, but got %d", len(q.BestTables))

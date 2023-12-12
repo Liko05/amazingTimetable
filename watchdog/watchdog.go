@@ -1,6 +1,7 @@
-package main
+package watchdog
 
 import (
+	"amazingTimetable/counter"
 	log "github.com/sirupsen/logrus"
 	"strconv"
 	"time"
@@ -11,7 +12,7 @@ type Watchdog struct {
 	DesiredDuration             int // seconds
 	DelayBetweenProgressUpdates int // seconds
 	ShouldFinish                chan bool
-	Counters                    *ThreadSafeCounters
+	Counters                    *counter.ThreadSafeCounters
 }
 
 // Start starts the watchdog

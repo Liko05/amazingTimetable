@@ -1,6 +1,8 @@
-package main
+package counter
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestThreadSafeCounters_IncrementChecked(t *testing.T) {
 	counter := ThreadSafeCounters{}

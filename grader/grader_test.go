@@ -1,11 +1,12 @@
-package main
+package grader
 
 import (
+	"amazingTimetable/table"
 	"testing"
 )
 
 func TestIsPracticalSubjectConnecting(t *testing.T) {
-	tb := Table{}
+	tb := table.Table{}
 	tb.CreateDefault()
 
 	result := tb.IsPracticalSubjectConnecting()
@@ -16,7 +17,7 @@ func TestIsPracticalSubjectConnecting(t *testing.T) {
 }
 
 func TestLunchBreaks(t *testing.T) {
-	tb := Table{}
+	tb := table.Table{}
 	tb.CreateDefault()
 
 	dayIndex := 0
@@ -38,7 +39,7 @@ func TestLunchBreaks(t *testing.T) {
 }
 
 func TestLegalityOfTheDay(t *testing.T) {
-	tb := Table{}
+	tb := table.Table{}
 	tb.CreateDefault()
 
 	dayIndex := 0
@@ -60,7 +61,7 @@ func TestLegalityOfTheDay(t *testing.T) {
 }
 
 func TestGradeSubjectsInDay(t *testing.T) {
-	tb := Table{}
+	tb := table.Table{}
 	tb.CreateDefault()
 
 	dayIndex := 0
@@ -82,7 +83,7 @@ func TestGradeSubjectsInDay(t *testing.T) {
 }
 
 func TestRoomChangePoints(t *testing.T) {
-	tb := Table{}
+	tb := table.Table{}
 	tb.CreateDefault()
 
 	dayIndex := 0
@@ -105,7 +106,7 @@ func TestRoomChangePoints(t *testing.T) {
 }
 
 func TestGradeIfSubjectOccursMultipleTimes(t *testing.T) {
-	tb := Table{}
+	tb := table.Table{}
 	tb.CreateDefault()
 
 	dayIndex := 0
@@ -128,7 +129,7 @@ func TestGradeIfSubjectOccursMultipleTimes(t *testing.T) {
 }
 
 func TestIsWeekReasonable(t *testing.T) {
-	tb := Table{}
+	tb := table.Table{}
 	tb.CreateDefault()
 
 	dayIndex := 0
@@ -143,7 +144,7 @@ func TestIsWeekReasonable(t *testing.T) {
 }
 
 func TestCheckIfStartsWithProfileSubjects(t *testing.T) {
-	tb := Table{}
+	tb := table.Table{}
 	tb.CreateDefault()
 
 	dayIndex := 0
@@ -165,7 +166,7 @@ func TestCheckIfStartsWithProfileSubjects(t *testing.T) {
 }
 
 func TestCheckIfEndsWithProfileSubjects(t *testing.T) {
-	tb := Table{}
+	tb := table.Table{}
 	tb.CreateDefault()
 
 	dayIndex := 0
@@ -187,7 +188,7 @@ func TestCheckIfEndsWithProfileSubjects(t *testing.T) {
 }
 
 func TestIsFirstClassHighestFloor(t *testing.T) {
-	tb := Table{}
+	tb := table.Table{}
 	tb.CreateDefault()
 
 	dayIndex := 0
@@ -209,7 +210,7 @@ func TestIsFirstClassHighestFloor(t *testing.T) {
 }
 
 func TestIsFridayShort(t *testing.T) {
-	tb := Table{}
+	tb := table.Table{}
 	tb.CreateDefault()
 
 	result := 0
@@ -222,7 +223,7 @@ func TestIsFridayShort(t *testing.T) {
 }
 
 func TestDislikedClassRoomPoint(t *testing.T) {
-	tb := Table{}
+	tb := table.Table{}
 	tb.CreateDefault()
 
 	result := tb.DislikedClassRoomPoint()
@@ -234,7 +235,7 @@ func TestDislikedClassRoomPoint(t *testing.T) {
 }
 
 func TestDislikedTeachers(t *testing.T) {
-	tb := Table{}
+	tb := table.Table{}
 	tb.CreateDefault()
 
 	dayIndex := 0
@@ -256,7 +257,7 @@ func TestDislikedTeachers(t *testing.T) {
 }
 
 func TestLikedTeachers(t *testing.T) {
-	tb := Table{}
+	tb := table.Table{}
 	tb.CreateDefault()
 
 	result := tb.LikedTeachers()
@@ -267,7 +268,7 @@ func TestLikedTeachers(t *testing.T) {
 }
 
 func TestTable_WellBeingPoints(t *testing.T) {
-	tb := Table{}
+	tb := table.Table{}
 	tb.CreateDefault()
 
 	result := 0

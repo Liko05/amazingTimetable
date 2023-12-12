@@ -1,10 +1,16 @@
-package main
+package generator
+
+import (
+	"amazingTimetable/counter"
+	"amazingTimetable/processing"
+	"amazingTimetable/table"
+)
 
 // Generator is responsible for running the generation of new timetables
 type Generator struct {
-	Counters        *ThreadSafeCounters
+	Counters        *counter.ThreadSafeCounters
 	NumberOfWorkers int
-	ProcessingQueue *ProcessingQueue
+	ProcessingQueue *processing.ProcessingQueue
 	ShouldFinish    chan bool
 }
 
@@ -17,7 +23,7 @@ func (g *Generator) Start() {
 
 // GenerationWorkerStart is the worker that generates new timetables
 func (g *Generator) GenerationWorkerStart() {
-	defaultTimeTable := Table{}
+	defaultTimeTable := table.Table{}
 	defaultTimeTable.CreateDefault()
 	for {
 		select {
