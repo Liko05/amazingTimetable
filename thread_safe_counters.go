@@ -5,10 +5,11 @@ import "sync"
 // ThreadSafeCounters is a struct that holds counters for the program
 // It is thread safe and can be used by multiple goroutines at the same time
 type ThreadSafeCounters struct {
-	Mu               sync.Mutex
-	GeneratedOptions uint64
-	CheckedOptions   uint64
-	ValidOptions     uint64
+	Mu                       sync.Mutex
+	GeneratedOptions         uint64
+	CheckedOptions           uint64
+	ValidOptions             uint64
+	OptionsBetterThanDefault uint64
 }
 
 // IncrementGenerated increments the number of generated options
@@ -51,4 +52,18 @@ func (l *ThreadSafeCounters) GetValid() uint64 {
 	l.Mu.Lock()
 	defer l.Mu.Unlock()
 	return l.ValidOptions
+}
+
+// IncrementOptionsBetterThanDefault increments the number of options better than default
+func (l *ThreadSafeCounters) IncrementOptionsBetterThanDefault() {
+	l.Mu.Lock()
+	l.OptionsBetterThanDefault++
+	l.Mu.Unlock()
+}
+
+// GetOptionsBetterThanDefault returns the number of options better than default
+func (l *ThreadSafeCounters) GetOptionsBetterThanDefault() uint64 {
+	l.Mu.Lock()
+	defer l.Mu.Unlock()
+	return l.OptionsBetterThanDefault
 }

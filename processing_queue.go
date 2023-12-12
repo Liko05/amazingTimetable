@@ -6,19 +6,27 @@ import (
 
 // ProcessingQueue is a thread safe Queue for storing time tables
 type ProcessingQueue struct {
-	Mu            sync.Mutex
-	Queue         []interface{}
-	BestTable     Table
-	OriginalTable Table
-	BestTables    []Table
+	Mu                 sync.Mutex
+	Queue              []interface{}
+	BestTable          Table
+	OriginalTable      Table
+	BestTables         []Table
+	ThreadSafeCounters *ThreadSafeCounters
+	Hashes             map[Table]bool
 }
 
 // Push pushes an element to the queue
 func (q *ProcessingQueue) Push(element interface{}) {
 	q.Mu.Lock()
 	defer q.Mu.Unlock()
+	table, ok := element.(Table)
+	if ok == false {
+		return
+	}
 
-	q.Queue = append(q.Queue, element)
+	q.Hashes[table] = true
+
+	q.Queue = append(q.Queue, table)
 }
 
 // Pop pops an element from the queue
@@ -47,6 +55,7 @@ func (q *ProcessingQueue) AddIfBetter(element interface{}) {
 
 	if table.Score > q.BestTable.Score {
 		q.BestTable = table
+		q.ThreadSafeCounters.IncrementOptionsBetterThanDefault()
 	}
 }
 

@@ -15,10 +15,11 @@ import (
 func CreateVariablesForWorkers() (chan bool, *ThreadSafeCounters, *ProcessingQueue) {
 	var shouldFinish = make(chan bool)
 	var counters = ThreadSafeCounters{
-		Mu:               sync.Mutex{},
-		GeneratedOptions: 0,
-		CheckedOptions:   0,
-		ValidOptions:     0,
+		Mu:                       sync.Mutex{},
+		GeneratedOptions:         0,
+		CheckedOptions:           0,
+		ValidOptions:             0,
+		OptionsBetterThanDefault: 0,
 	}
 	var processingQueue = ProcessingQueue{
 		Mu:    sync.Mutex{},
@@ -26,7 +27,9 @@ func CreateVariablesForWorkers() (chan bool, *ThreadSafeCounters, *ProcessingQue
 		BestTable: Table{
 			Score: -10000,
 		},
-		BestTables: make([]Table, 0),
+		BestTables:         make([]Table, 0),
+		ThreadSafeCounters: &counters,
+		Hashes:             make(map[Table]bool),
 	}
 	return shouldFinish, &counters, &processingQueue
 }
@@ -99,7 +102,7 @@ func TimeLimit(processingQueue *ProcessingQueue, counters *ThreadSafeCounters, t
 	log.Info("Total time taken: " + time.Since(timeStart).String())
 	log.Info("Generated options: " + strconv.FormatUint(counters.GeneratedOptions, 10) + ", checked options: " + strconv.FormatUint(counters.CheckedOptions, 10) + ", valid options: " + strconv.FormatUint(counters.ValidOptions, 10))
 	log.Info("Best table has score: " + strconv.Itoa(processingQueue.BestTable.Score))
-	log.Info(strconv.Itoa(len(processingQueue.BestTables)) + "were better than the original table with a score of: " + strconv.Itoa(processingQueue.OriginalTable.Score))
+	log.Info(strconv.FormatUint(counters.OptionsBetterThanDefault, 10) + "were better than the original table with a score of: " + strconv.Itoa(processingQueue.OriginalTable.Score))
 	log.Info("Best table: ")
 	println(processingQueue.BestTable.String())
 
@@ -139,10 +142,9 @@ func main() {
 	timeStart := time.Now()
 
 	//go Interrupt(processingQueue, counters, timeStart, c)
-
+	watchdog.Start(timeStart)
 	generators.Start()
 	graders.Start()
-	watchdog.Start(timeStart)
 
 	<-shouldFinish
 	TimeLimit(processingQueue, counters, timeStart)
