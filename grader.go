@@ -120,7 +120,7 @@ func (tb *Table) LegalityOfTheDay(dayIndex int) int {
 	case classes == 7:
 		return 0
 	case classes == 8 || classes == 9:
-		return -25
+		return -250
 	default:
 		return -100000
 	}
