@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	log "github.com/sirupsen/logrus"
 	"os"
 	"strconv"
@@ -25,7 +24,8 @@ func CreateVariablesForWorkers() (chan bool, *ThreadSafeCounters, *ProcessingQue
 		BestTable: Table{
 			Score: -10000,
 		},
-		BestTables: make([]Table, 0),
+		BestTables:   make([]Table, 0),
+		ShouldFinish: &shouldFinish,
 	}
 	return shouldFinish, &counters, &processingQueue
 }
@@ -118,8 +118,4 @@ func main() {
 		println(processingQueue.OriginalTable.String())
 		log.Info("Original table score: " + strconv.Itoa(processingQueue.OriginalTable.Score))
 	}
-
-	var input string
-	log.Info("Press enter to exit")
-	_, _ = fmt.Scanln(&input)
 }

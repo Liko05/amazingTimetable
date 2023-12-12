@@ -23,6 +23,8 @@ func (w *Watchdog) Start(timeStart time.Time) {
 		for {
 			if time.Since(timeStart).Seconds() >= float64(w.DesiredDuration) {
 				w.ShouldFinish <- true
+				log.Info("Time limit reached")
+				return
 			} else if time.Since(lastUpdate).Seconds() >= float64(w.DelayBetweenProgressUpdates) {
 				log.Info("Generated time tables: " + strconv.FormatUint(w.Counters.GetGenerated(), 10) + " Checked time tables: " + strconv.FormatUint(w.Counters.GetChecked(), 10))
 				lastUpdate = time.Now()

@@ -51,7 +51,7 @@ func (tb *Table) IsWeekReasonable() bool {
 	if !tb.IsPracticalSubjectConnecting() {
 		return false
 	}
-	log.Info("Passed practical")
+
 	for i := 0; i < 5; i++ {
 		dayIndex = i * 10
 		//mandatory rules which might return early so we dont waste resources

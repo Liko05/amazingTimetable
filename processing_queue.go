@@ -11,6 +11,7 @@ type ProcessingQueue struct {
 	BestTable     Table
 	OriginalTable Table
 	BestTables    []Table // left here just for debugging purposes
+	ShouldFinish  *chan bool
 }
 
 // Push pushes an element to the queue
