@@ -4,6 +4,7 @@ import (
 	"flag"
 	log "github.com/sirupsen/logrus"
 	"os"
+	"os/signal"
 	"runtime"
 	"strconv"
 	"sync"
@@ -93,20 +94,8 @@ func GetArgsAndApplyArgs(watchdog *Watchdog, generators *Generator, graders *Gra
 	log.Info("Starting with time limit: " + strconv.Itoa(timeLimit) + " seconds")
 }
 
-// main is the entry point of the program
-func main() {
-	shouldFinish, counters, processingQueue := CreateVariablesForWorkers()
-	watchdog, generators, graders := CreateWorkers(shouldFinish, counters, processingQueue)
-
-	GetArgsAndApplyArgs(&watchdog, &generators, &graders)
-
-	timeStart := time.Now()
-
-	watchdog.Start(timeStart)
-	generators.Start()
-	graders.Start()
-
-	<-shouldFinish
+// TimeLimit is called when the time limit is reached. Responsible for logging the results
+func TimeLimit(processingQueue *ProcessingQueue, counters *ThreadSafeCounters, timeStart time.Time) {
 	log.Info("Time limit reached, finished processing at: " + time.Now().Format("2006-01-02 15:04:05"))
 	log.Info("Total time taken: " + time.Since(timeStart).String())
 	log.Info("Generated options: " + strconv.FormatUint(counters.GeneratedOptions, 10) + ", checked options: " + strconv.FormatUint(counters.CheckedOptions, 10) + ", valid options: " + strconv.FormatUint(counters.ValidOptions, 10))
@@ -122,4 +111,39 @@ func main() {
 		println(processingQueue.OriginalTable.String())
 		log.Info("Original table score: " + strconv.Itoa(processingQueue.OriginalTable.Score))
 	}
+}
+
+// Interrupt is called when the program is interrupted. Responsible for logging the results
+func Interrupt(processingQueue *ProcessingQueue, counters *ThreadSafeCounters, timeStart time.Time, c chan os.Signal) {
+	<-c
+	log.Info("Interrupted processing at: " + time.Now().Format("2006-01-02 15:04:05"))
+	log.Info("Total time taken: " + time.Since(timeStart).String())
+	log.Info("Generated options: " + strconv.FormatUint(counters.GeneratedOptions, 10) + ", checked options: " + strconv.FormatUint(counters.CheckedOptions, 10) + ", valid options: " + strconv.FormatUint(counters.ValidOptions, 10))
+	log.Info("Best table has score: " + strconv.Itoa(processingQueue.BestTable.Score))
+	log.Info(strconv.Itoa(len(processingQueue.BestTables)) + "were better than the original table with a score of: " + strconv.Itoa(processingQueue.OriginalTable.Score))
+	log.Info("Best table: ")
+	println(processingQueue.BestTable.String())
+	os.Exit(1)
+}
+
+// main is the entry point of the program
+func main() {
+	shouldFinish, counters, processingQueue := CreateVariablesForWorkers()
+	watchdog, generators, graders := CreateWorkers(shouldFinish, counters, processingQueue)
+	GetArgsAndApplyArgs(&watchdog, &generators, &graders)
+
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+
+	timeStart := time.Now()
+
+	go Interrupt(processingQueue, counters, timeStart, c)
+
+	watchdog.Start(timeStart)
+	generators.Start()
+	graders.Start()
+
+	<-shouldFinish
+	TimeLimit(processingQueue, counters, timeStart)
+
 }
