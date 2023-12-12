@@ -4,7 +4,7 @@ import (
 	"flag"
 	log "github.com/sirupsen/logrus"
 	"os"
-	"os/signal"
+	//"os/signal"
 	"runtime"
 	"strconv"
 	"sync"
@@ -132,12 +132,12 @@ func main() {
 	watchdog, generators, graders := CreateWorkers(shouldFinish, counters, processingQueue)
 	GetArgsAndApplyArgs(&watchdog, &generators, &graders)
 
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt)
+	//c := make(chan os.Signal, 1)
+	//signal.Notify(c, os.Interrupt)
 
 	timeStart := time.Now()
 
-	go Interrupt(processingQueue, counters, timeStart, c)
+	//go Interrupt(processingQueue, counters, timeStart, c)
 
 	watchdog.Start(timeStart)
 	generators.Start()
