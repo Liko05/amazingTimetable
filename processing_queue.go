@@ -10,7 +10,7 @@ type ProcessingQueue struct {
 	Queue         []interface{}
 	BestTable     Table
 	OriginalTable Table
-	BestTables    []Table // left here just for debugging purposes
+	BestTables    []Table
 }
 
 // Push pushes an element to the queue
@@ -61,9 +61,11 @@ func (q *ProcessingQueue) AddToBestTables(element interface{}) {
 		return
 	}
 
-	//if table.Hash() != q.OriginalTable.Hash() && table.Score > q.OriginalTable.Score {
+	if q.CheckBestTableUnique(&table) == false {
+		return
+	}
+
 	q.BestTables = append(q.BestTables, table)
-	//}
 
 }
 
@@ -77,4 +79,13 @@ func (q *ProcessingQueue) AddOriginal(element interface{}) {
 	}
 
 	q.OriginalTable = table
+}
+
+func (q *ProcessingQueue) CheckBestTableUnique(table *Table) bool {
+	for i := 0; i < len(q.BestTables); i++ {
+		if q.BestTables[i].Hash() == table.Hash() {
+			return false
+		}
+	}
+	return true
 }
