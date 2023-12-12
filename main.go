@@ -132,6 +132,8 @@ func main() {
 	watchdog, generators, graders := CreateWorkers(shouldFinish, counters, processingQueue)
 	GetArgsAndApplyArgs(&watchdog, &generators, &graders)
 
+	log.Info("Go Max Procs: " + strconv.Itoa(runtime.GOMAXPROCS(0)))
+
 	//c := make(chan os.Signal, 1)
 	//signal.Notify(c, os.Interrupt)
 
