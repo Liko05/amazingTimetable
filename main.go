@@ -139,9 +139,9 @@ func main() {
 
 	//go Interrupt(processingQueue, counters, timeStart, c)
 
-	watchdog.Start(timeStart)
 	generators.Start()
 	graders.Start()
+	watchdog.Start(timeStart)
 
 	<-shouldFinish
 	TimeLimit(processingQueue, counters, timeStart)
