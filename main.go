@@ -31,7 +31,7 @@ func CreateVariablesForWorkers() (chan bool, *c.ThreadSafeCounters, *p.Processin
 		BestTable:          t.Table{},
 		OriginalTable:      t.Table{},
 		ThreadSafeCounters: nil,
-		Hashes:             make(map[uint32]bool, 200_000_000),
+		Hashes:             make(map[uint32]bool, 400_000_000),
 	}
 
 	return shouldFinish, &counters, &processingQueue

@@ -1,3 +1,4 @@
+// Package counter is a package that holds the counters for the program
 package counter
 
 import "sync"
