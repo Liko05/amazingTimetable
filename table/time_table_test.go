@@ -20,8 +20,10 @@ func TestTable_CheckConsecutiveClasses(t *testing.T) {
 	tb := Table{}
 	tb.CreateDefault()
 
-	if !tb.CheckConsecutiveClasses() {
-		t.Errorf("Expected true, got %v", tb.CheckConsecutiveClasses())
+	for i := 0; i < 5; i++ {
+		if !tb.CheckConsecutiveClasses(i) {
+			t.Errorf("Expected true, got %v", tb.CheckConsecutiveClasses(i))
+		}
 	}
 }
 
@@ -47,7 +49,29 @@ func TestTable_CheckConsecutiveClasses_Fails(t *testing.T) {
 		Floor:   100,
 	}
 
-	if tb.CheckConsecutiveClasses() {
-		t.Errorf("Expected false, got %v", tb.CheckConsecutiveClasses())
+	if tb.CheckConsecutiveClasses(0) {
+		t.Errorf("Expected false, got %v", tb.CheckConsecutiveClasses(0))
+	}
+}
+
+func TestTable_LegalityOfTheDay(t *testing.T) {
+	tb := Table{}
+	tb.CreateDefault()
+
+	for i := 0; i < 5; i++ {
+		if !tb.LegalityOfTheDay(i) {
+			t.Errorf("Expected true, got %v", tb.LegalityOfTheDay(i))
+		}
+	}
+}
+
+func TestTable_IsThereLunchPause(t *testing.T) {
+	tb := Table{}
+	tb.CreateDefault()
+
+	for i := 0; i < 5; i++ {
+		if !tb.IsThereLunchPause(i) {
+			t.Errorf("Expected true, got %v", tb.IsThereLunchPause(i))
+		}
 	}
 }

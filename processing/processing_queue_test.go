@@ -6,7 +6,7 @@ import (
 )
 
 func TestProcessingQueue_Push(t *testing.T) {
-	q := ProcessingQueue{}
+	q := Queue{}
 	q.Push(1)
 	q.Push(2)
 	q.Push(3)
@@ -17,7 +17,7 @@ func TestProcessingQueue_Push(t *testing.T) {
 }
 
 func TestProcessingQueue_Pop(t *testing.T) {
-	q := ProcessingQueue{}
+	q := Queue{}
 	q.Push(1)
 	q.Push(2)
 	q.Push(3)
@@ -37,7 +37,7 @@ func TestProcessingQueue_Pop(t *testing.T) {
 }
 
 func TestProcessingQueue_AddIfBetter(t *testing.T) {
-	q := ProcessingQueue{}
+	q := Queue{}
 	q.BestTable = table.Table{Score: 1}
 	q.AddIfBetter(table.Table{Score: 2})
 	q.AddIfBetter(table.Table{Score: 3})
@@ -48,7 +48,7 @@ func TestProcessingQueue_AddIfBetter(t *testing.T) {
 }
 
 func TestProcessingQueue_AddToBestTables(t *testing.T) {
-	q := ProcessingQueue{}
+	q := Queue{}
 	table1, table2, table3 := table.Table{Score: 1}, table.Table{Score: 2}, table.Table{Score: 3}
 	table1.CreateDefault()
 	table1.Shuffle()
@@ -69,7 +69,7 @@ func TestProcessingQueue_AddToBestTables(t *testing.T) {
 }
 
 func TestProcessingQueue_AddToBestTablesFailsOnMatchingHashes(t *testing.T) {
-	q := ProcessingQueue{}
+	q := Queue{}
 	q.AddToBestTables(table.Table{Score: 1})
 	q.AddToBestTables(table.Table{Score: 2})
 	q.AddToBestTables(table.Table{Score: 3})

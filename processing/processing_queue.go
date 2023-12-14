@@ -2,50 +2,45 @@ package processing
 
 import (
 	"amazingTimetable/counter"
-	"amazingTimetable/table"
 	"sync"
 )
 
-// ProcessingQueue is a thread safe Queue for storing time tables
-type ProcessingQueue struct {
+// Queue is a thread safe Queue for storing time tables
+type Queue struct {
 	Mu                 sync.Mutex
-	BestTable          table.Table
-	OriginalTable      table.Table
 	ThreadSafeCounters *counter.ThreadSafeCounters
+	Queue              []interface{}
 	Hashes             map[uint32]bool
 }
 
-// AddIfBetter adds an element to the BestTable if it is better than the current BestTable
-func (q *ProcessingQueue) AddIfBetter(element interface{}) {
-	q.Mu.Lock()
-	defer q.Mu.Unlock()
-
-	table, ok := element.(table.Table)
-	if ok == false {
-		return
-	}
-
-	if table.Score > q.BestTable.Score {
-		q.BestTable = table
-		q.ThreadSafeCounters.IncrementOptionsBetterThanDefault()
-	}
+// Push pushes an element to the queue
+func (p *Queue) Push(element interface{}) {
+	p.Mu.Lock()
+	defer p.Mu.Unlock()
+	p.Queue = append(p.Queue, element)
 }
 
-func (q *ProcessingQueue) AddHash(hash uint32) {
-	q.Mu.Lock()
-	defer q.Mu.Unlock()
-
-	q.Hashes[hash] = true
-}
-
-func (q *ProcessingQueue) AddOriginal(element interface{}) {
-	q.Mu.Lock()
-	defer q.Mu.Unlock()
-
-	table, ok := element.(table.Table)
-	if ok == false {
-		return
+// Pop pops an element from the queue
+func (p *Queue) Pop() interface{} {
+	p.Mu.Lock()
+	defer p.Mu.Unlock()
+	if len(p.Queue) == 0 {
+		return nil
 	}
 
-	q.OriginalTable = table
+	element := p.Queue[0]
+	p.Queue = p.Queue[1:]
+
+	return element
+}
+
+func (p *Queue) CheckHash(hash uint32) bool {
+	p.Mu.Lock()
+	defer p.Mu.Unlock()
+
+	if p.Hashes[hash] {
+		return true
+	}
+	p.Hashes[hash] = true
+	return false
 }

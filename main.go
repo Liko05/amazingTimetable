@@ -3,8 +3,8 @@ package main
 import (
 	c "amazingTimetable/counter"
 	g "amazingTimetable/generator"
+	gr "amazingTimetable/grader"
 	p "amazingTimetable/processing"
-	t "amazingTimetable/table"
 	w "amazingTimetable/watchdog"
 	"flag"
 	log "github.com/sirupsen/logrus"
@@ -16,7 +16,7 @@ import (
 )
 
 // CreateVariablesForWorkers creates the variables for the workers
-func CreateVariablesForWorkers() (chan bool, *c.ThreadSafeCounters, *p.ProcessingQueue) {
+func CreateVariablesForWorkers() (chan bool, *c.ThreadSafeCounters, *p.Queue) {
 	var shouldFinish = make(chan bool)
 	var counters = c.ThreadSafeCounters{
 		Mu:                       sync.Mutex{},
@@ -26,19 +26,18 @@ func CreateVariablesForWorkers() (chan bool, *c.ThreadSafeCounters, *p.Processin
 		OptionsBetterThanDefault: 0,
 	}
 
-	var processingQueue = p.ProcessingQueue{
+	var processingQueue = p.Queue{
 		Mu:                 sync.Mutex{},
-		BestTable:          t.Table{},
-		OriginalTable:      t.Table{},
-		ThreadSafeCounters: nil,
-		Hashes:             make(map[uint32]bool, 400_000_000),
+		ThreadSafeCounters: &counters,
+		Queue:              make([]interface{}, 0),
+		Hashes:             make(map[uint32]bool, 200_000_000),
 	}
 
 	return shouldFinish, &counters, &processingQueue
 }
 
 // CreateWorkers creates the workers
-func CreateWorkers(shouldFinish chan bool, counters *c.ThreadSafeCounters, processingQueue *p.ProcessingQueue) (w.Watchdog, g.Generator) {
+func CreateWorkers(shouldFinish chan bool, counters *c.ThreadSafeCounters, processingQueue *p.Queue) (w.Watchdog, g.Generator, gr.Grader) {
 	var watchdog = w.Watchdog{
 		DesiredDuration:             0,
 		DelayBetweenProgressUpdates: 0,
@@ -52,14 +51,20 @@ func CreateWorkers(shouldFinish chan bool, counters *c.ThreadSafeCounters, proce
 		ProcessingQueue: processingQueue,
 	}
 
-	return watchdog, generator
+	var grader = gr.Grader{
+		Counters:        counters,
+		ProcessingQueue: processingQueue,
+	}
+
+	return watchdog, generator, grader
 }
 
 // GetArgsAndApply gets the arguments from the command line and applies them to the workers
-func GetArgsAndApply(watchdog *w.Watchdog, generator *g.Generator) {
+func GetArgsAndApply(watchdog *w.Watchdog, generator *g.Generator, grader *gr.Grader) {
 	var timeLimit int
 	var timeBetweenProgressUpdates int
 	var numberOfGenerators int
+	var numberOfGraders int
 	var debugLevel bool
 	var help bool
 
@@ -67,7 +72,8 @@ func GetArgsAndApply(watchdog *w.Watchdog, generator *g.Generator) {
 
 	flag.IntVar(&timeLimit, "t", 180, "The time limit in seconds")
 	flag.IntVar(&timeBetweenProgressUpdates, "p", 10, "The time between progress updates in seconds")
-	flag.IntVar(&numberOfGenerators, "g", numberOfAvailableCPUs-1, "The number of generators")
+	flag.IntVar(&numberOfGenerators, "g", numberOfAvailableCPUs/2, "The number of generators")
+	flag.IntVar(&numberOfGraders, "r", numberOfAvailableCPUs/2, "The number of graders")
 	flag.BoolVar(&debugLevel, "d", false, "Enable debug level logging")
 	flag.BoolVar(&help, "h", false, "Show help")
 
@@ -91,20 +97,25 @@ func GetArgsAndApply(watchdog *w.Watchdog, generator *g.Generator) {
 	watchdog.DesiredDuration = timeLimit
 	watchdog.DelayBetweenProgressUpdates = timeBetweenProgressUpdates
 	generator.NumberOfWorkers = numberOfGenerators
+	grader.NumberOfWorker = numberOfGraders
 
 	log.Info("Starting with time limit: " + strconv.Itoa(timeLimit) + " seconds")
 }
 
 // main is the entry point of the program
 func main() {
-	var watchdog, generator = CreateWorkers(CreateVariablesForWorkers())
-	GetArgsAndApply(&watchdog, &generator)
+	var watchdog, generator, grader = CreateWorkers(CreateVariablesForWorkers())
+	GetArgsAndApply(&watchdog, &generator, &grader)
 
 	watchdog.Start(time.Now())
 	generator.Start()
+	grader.Start()
 
 	<-watchdog.ShouldFinish
 
 	log.Info("Finished")
+	log.Info("Checked options: " + strconv.FormatUint(grader.Counters.CheckedOptions, 10))
 	log.Info("Generated options: " + strconv.FormatUint(generator.Counters.GeneratedOptions, 10))
+	log.Info("Valid options: " + strconv.FormatUint(grader.Counters.ValidOptions, 10))
+	log.Info("Options with unique hash: " + strconv.FormatUint(grader.Counters.OptionsBetterThanDefault, 10))
 }

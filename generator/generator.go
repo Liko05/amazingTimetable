@@ -10,7 +10,7 @@ import (
 type Generator struct {
 	Counters        *counter.ThreadSafeCounters
 	NumberOfWorkers int
-	ProcessingQueue *processing.ProcessingQueue
+	ProcessingQueue *processing.Queue
 	ShouldFinish    chan bool
 }
 
@@ -28,11 +28,13 @@ func (g *Generator) GenerationWorkerStart() {
 	for {
 		select {
 		case <-g.ShouldFinish:
-			println(g.ProcessingQueue.Hashes[defaultTimeTable.Hash()])
 			return
 		default:
 			defaultTimeTable.Shuffle()
-			g.ProcessingQueue.AddHash(defaultTimeTable.Hash())
+			if !g.ProcessingQueue.CheckHash(defaultTimeTable.Hash()) {
+				g.ProcessingQueue.Push(defaultTimeTable)
+				g.Counters.IncrementOptionsBetterThanDefault()
+			}
 			g.Counters.IncrementGenerated()
 		}
 	}

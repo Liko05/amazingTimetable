@@ -14,7 +14,7 @@ import (
 func TestGenerator_GenerationWorkerStart(t *testing.T) {
 	shouldFinish := make(chan bool)
 	counters := counter.ThreadSafeCounters{}
-	processingQueue := processing.ProcessingQueue{
+	processingQueue := processing.Queue{
 		Mu:         sync.Mutex{},
 		Queue:      make([]interface{}, 0),
 		BestTable:  table.Table{},
