@@ -1,3 +1,4 @@
+// Package hash is creating thread safe map for the purpose of storing hashes.
 package hash
 
 import (
@@ -10,7 +11,8 @@ type Hashes struct {
 	Hashes map[uint32]bool
 }
 
-func (h *Hashes) CheckHash(hash uint32) bool {
+// ContainsAndAdd checks if hash is already in map and adds it if it's not
+func (h *Hashes) ContainsAndAdd(hash uint32) bool {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 

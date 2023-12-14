@@ -1,3 +1,4 @@
+// Package grader contains the Grader struct and its methods used for processing the tables and grading them.
 package grader
 
 import (
@@ -5,11 +6,13 @@ import (
 	"amazingTimetable/table"
 )
 
+// Grader is a struct that contains the counters and the channel for finishing the program
 type Grader struct {
 	Counters     *counter.ThreadSafeCounters
 	ShouldFinish chan bool
 }
 
+// Start starts the grader worker that is processing incoming tables
 func (g *Grader) Start(queue chan table.Table) {
 	for {
 		select {

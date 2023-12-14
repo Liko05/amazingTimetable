@@ -1,3 +1,4 @@
+// Package watchdog is used for monitoring the progress of the program and ending it when the limit is reached
 package watchdog
 
 import (

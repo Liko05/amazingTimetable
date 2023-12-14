@@ -1,3 +1,4 @@
+// Package generator is responsible for running the generation of new timetables
 package generator
 
 import (
@@ -6,23 +7,22 @@ import (
 	"amazingTimetable/table"
 )
 
-// Generator is responsible for running the generation of new timetables
+// Generator is struct that is holding the necessary data for the generation of new timetables
 type Generator struct {
 	Counters     *counter.ThreadSafeCounters
 	Hashes       *hash.Hashes
 	ShouldFinish chan bool
 }
 
-// Start starts the generation of new timetables based on the NumberOfWorkers
+// Start starts the generation of new timetables and sends them to the channel for processing if their hash is not already in the hash map
 func (g *Generator) Start(que chan table.Table) {
 	defaultTimeTable := table.Table{}
 	defaultTimeTable.CreateDefault()
 	for {
 		defaultTimeTable.Shuffle()
-		//if !g.Hashes.CheckHash(defaultTimeTable.Hash()) {
-		que <- defaultTimeTable
-		g.Counters.IncrementGenerated()
-
-		//	}
+		if !g.Hashes.ContainsAndAdd(defaultTimeTable.Hash()) {
+			que <- defaultTimeTable
+			g.Counters.IncrementGenerated()
+		}
 	}
 }

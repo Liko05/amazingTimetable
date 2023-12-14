@@ -1,3 +1,4 @@
+// Package utils Contains helper functions that are used in other packages
 package utils
 
 import (
@@ -18,6 +19,9 @@ func TableToString(t table.Table) string {
 			currentSubject.Name -= 100
 		}
 		result += "Subject: " + subjects[currentSubject.Name] + " Teacher: " + teachers[currentSubject.Teacher] + " Room: " + rooms[currentSubject.Room] + " Floor: " + strconv.Itoa(int(currentSubject.Floor)) + " Is Practical: " + strconv.FormatBool(isPractical) + "\n"
+		if i%10 == 9 {
+			result += "\n"
+		}
 	}
 	return result
 }

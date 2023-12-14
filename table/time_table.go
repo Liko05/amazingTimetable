@@ -266,6 +266,7 @@ func (tb *Table) Hash() uint32 {
 	return hash.Sum32()
 }
 
+// IsEmpty checks if the timetable is empty
 func (tb *Table) IsEmpty() bool {
 	for i := 0; i < len(tb.TimeTable); i++ {
 		if tb.TimeTable[i].Name > 0 {
@@ -275,6 +276,7 @@ func (tb *Table) IsEmpty() bool {
 	return true
 }
 
+// IsTableValid checks if the timetable is valid
 func (tb *Table) IsTableValid() bool {
 	for days := 0; days < 5; days++ {
 		if !tb.checkConsecutiveClasses(days) {
@@ -292,6 +294,7 @@ func (tb *Table) IsTableValid() bool {
 	return true
 }
 
+// checkConsecutiveClasses checks if the practical classes are consecutive
 func (tb *Table) checkConsecutiveClasses(dayIndex int) bool {
 	for hours := 1; hours < 9; hours++ {
 		if tb.TimeTable[dayIndex*10+hours].Name < 100 {
@@ -311,6 +314,7 @@ func (tb *Table) checkConsecutiveClasses(dayIndex int) bool {
 	return true
 }
 
+// legalityOfTheDay checks if the timetable is legal
 func (tb *Table) legalityOfTheDay(dayIndex int) bool {
 	maxClasses := 0
 	for hours := 0; hours < 10; hours++ {
@@ -324,6 +328,7 @@ func (tb *Table) legalityOfTheDay(dayIndex int) bool {
 	return true
 }
 
+// isThereLunchPause checks if there is a lunch pause
 func (tb *Table) isThereLunchPause(dayIndex int) bool {
 	if tb.TimeTable[dayIndex*10+4].Name == 0 || tb.TimeTable[dayIndex*10+5].Name == 0 || tb.TimeTable[dayIndex*10+6].Name == 0 || tb.TimeTable[dayIndex*10+7].Name == 0 {
 		return true
@@ -331,7 +336,118 @@ func (tb *Table) isThereLunchPause(dayIndex int) bool {
 	return false
 }
 
+// GradeTable grades the timetable
 func (tb *Table) GradeTable() {
+	for days := 0; days < 5; days++ {
+		tb.Score += tb.firstFloorStart(days)
+		tb.Score += tb.roomChanges(days)
+		tb.Score += tb.sameSubjectInDay(days)
+		tb.Score += tb.profileSubjectsFirstOrAfterPause(days)
 
-	tb.Score = rand.Int31n(100)
+	}
+	tb.Score += tb.isFridayShort()
+}
+
+// firstFloorStart checks if the first class is on the first or ground floor
+func (tb *Table) firstFloorStart(dayIndex int) int32 {
+	for hours := 0; hours < 10; hours++ {
+		if tb.TimeTable[dayIndex*10+hours].Name > 0 {
+			if tb.TimeTable[dayIndex*10+hours].Floor == 1 || tb.TimeTable[dayIndex*10+hours].Floor == 0 {
+				return 100
+			} else {
+				return -100
+			}
+		} else {
+			continue
+		}
+	}
+	return 0
+}
+
+// isFridayShort checks if the friday is short
+func (tb *Table) isFridayShort() int32 {
+	count := 0
+	for hours := 0; hours < 10; hours++ {
+		if tb.TimeTable[40+hours].Name > 0 {
+			count++
+		}
+	}
+	if count <= 5 {
+		return 100
+	}
+	if count >= 7 {
+		return -100
+	}
+	return 0
+}
+
+// roomChanges checks if the room changes are legal
+func (tb *Table) roomChanges(dayIndex int) int32 {
+	finalScore := 0
+	for hours := 0; hours < 9; hours++ {
+		if tb.TimeTable[dayIndex*10+hours].Room != tb.TimeTable[dayIndex*10+hours+1].Room {
+			if tb.TimeTable[dayIndex*10+hours].Floor == tb.TimeTable[dayIndex*10+hours+1].Floor {
+				finalScore += 50
+			} else {
+				finalScore += -150
+			}
+		} else {
+			finalScore += 100
+		}
+	}
+	return int32(finalScore)
+}
+
+// sameSubjectInDay checks if the same subject is in the same day
+func (tb *Table) sameSubjectInDay(dayIndex int) int32 {
+	finalScore := 0
+	subjects := make(map[uint8]int)
+	for hours := 0; hours < 10; hours++ {
+		if tb.TimeTable[dayIndex*10+hours].Name > 0 {
+			subjects[tb.TimeTable[dayIndex*10+hours].Name]++
+		}
+	}
+
+	for sub, value := range subjects {
+		if value >= 2 && sub < 100 {
+			finalScore += -100
+		} else {
+			if subjects[(sub+100)] == 2 {
+				finalScore += 100
+			}
+		}
+	}
+	return int32(finalScore)
+}
+
+// profileSubjectsFirstOrAfterPause checks if the profile subjects are first or after the pause
+func (tb *Table) profileSubjectsFirstOrAfterPause(dayIndex int) int32 {
+	finalScore := 0
+	profileSubjects := []uint8{4, 6, 10, 11, 12}
+
+	for hours := 0; hours < 10; hours++ {
+		if tb.TimeTable[dayIndex*10+hours].Name > 0 {
+			for _, sub := range profileSubjects {
+				if tb.TimeTable[dayIndex*10+hours].Name == sub || tb.TimeTable[dayIndex*10+hours].Name == sub+100 {
+					finalScore -= 100
+					break
+				}
+			}
+			break
+		}
+	}
+
+	for hours := 4; hours < 7; hours++ {
+		if tb.TimeTable[dayIndex*10+hours].Name == 0 {
+			for _, sub := range profileSubjects {
+				if tb.TimeTable[dayIndex*10+hours+1].Name == sub || tb.TimeTable[dayIndex*10+hours+1].Name == sub+100 {
+					finalScore += -100
+					break
+				}
+			}
+			break
+		}
+	}
+
+	return int32(finalScore)
 }
