@@ -1,7 +1,10 @@
 // Package counter is a package that holds the counters for the program
 package counter
 
-import "sync"
+import (
+	"amazingTimetable/table"
+	"sync"
+)
 
 // ThreadSafeCounters is a struct that holds counters for the program
 // It is thread safe and can be used by multiple goroutines at the same time
@@ -11,6 +14,8 @@ type ThreadSafeCounters struct {
 	CheckedOptions           uint64
 	ValidOptions             uint64
 	OptionsBetterThanDefault uint64
+	BestOption               table.Table
+	OriginalOption           table.Table
 }
 
 // IncrementGenerated increments the number of generated options
@@ -67,4 +72,30 @@ func (l *ThreadSafeCounters) GetOptionsBetterThanDefault() uint64 {
 	l.Mu.Lock()
 	defer l.Mu.Unlock()
 	return l.OptionsBetterThanDefault
+}
+
+// SetBestOption Checks if the table is better than the current best option and sets it if it is
+func (l *ThreadSafeCounters) SetBestOption(table table.Table) {
+	l.Mu.Lock()
+	if table.Score > l.BestOption.Score {
+		l.BestOption = table
+	}
+	if table.Score > l.OriginalOption.Score {
+		l.OptionsBetterThanDefault++
+	}
+	l.Mu.Unlock()
+}
+
+// GetBestOption returns the best option
+func (l *ThreadSafeCounters) GetBestOption() table.Table {
+	l.Mu.Lock()
+	defer l.Mu.Unlock()
+	return l.BestOption
+}
+
+// GetOriginalOption returns the original option
+func (l *ThreadSafeCounters) GetOriginalOption() table.Table {
+	l.Mu.Lock()
+	defer l.Mu.Unlock()
+	return l.OriginalOption
 }

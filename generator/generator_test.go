@@ -2,7 +2,7 @@ package generator
 
 import (
 	"amazingTimetable/counter"
-	"amazingTimetable/processing"
+	"amazingTimetable/hash"
 	"amazingTimetable/table"
 	"amazingTimetable/watchdog"
 	"sync"
@@ -14,7 +14,7 @@ import (
 func TestGenerator_GenerationWorkerStart(t *testing.T) {
 	shouldFinish := make(chan bool)
 	counters := counter.ThreadSafeCounters{}
-	processingQueue := processing.Queue{
+	processingQueue := hash.hashes{
 		Mu:         sync.Mutex{},
 		Queue:      make([]interface{}, 0),
 		BestTable:  table.Table{},

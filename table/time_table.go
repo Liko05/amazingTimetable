@@ -1,3 +1,4 @@
+// Package table contains the struct that represents a timetable and subjects along with the functions that operate on it.
 package table
 
 import (
@@ -274,7 +275,24 @@ func (tb *Table) IsEmpty() bool {
 	return true
 }
 
-func (tb *Table) CheckConsecutiveClasses(dayIndex int) bool {
+func (tb *Table) IsTableValid() bool {
+	for days := 0; days < 5; days++ {
+		if !tb.checkConsecutiveClasses(days) {
+			return false
+		}
+
+		if !tb.legalityOfTheDay(days) {
+			return false
+		}
+
+		if !tb.isThereLunchPause(days) {
+			return false
+		}
+	}
+	return true
+}
+
+func (tb *Table) checkConsecutiveClasses(dayIndex int) bool {
 	for hours := 1; hours < 9; hours++ {
 		if tb.TimeTable[dayIndex*10+hours].Name < 100 {
 			continue
@@ -284,10 +302,16 @@ func (tb *Table) CheckConsecutiveClasses(dayIndex int) bool {
 			return false
 		}
 	}
+
+	if tb.TimeTable[dayIndex*10+9].Name > 100 {
+		if tb.TimeTable[dayIndex*10+8].Name != tb.TimeTable[dayIndex*10+9].Name {
+			return false
+		}
+	}
 	return true
 }
 
-func (tb *Table) LegalityOfTheDay(dayIndex int) bool {
+func (tb *Table) legalityOfTheDay(dayIndex int) bool {
 	maxClasses := 0
 	for hours := 0; hours < 10; hours++ {
 		if tb.TimeTable[dayIndex*10+hours].Name > 0 {
@@ -300,9 +324,14 @@ func (tb *Table) LegalityOfTheDay(dayIndex int) bool {
 	return true
 }
 
-func (tb *Table) IsThereLunchPause(dayIndex int) bool {
+func (tb *Table) isThereLunchPause(dayIndex int) bool {
 	if tb.TimeTable[dayIndex*10+4].Name == 0 || tb.TimeTable[dayIndex*10+5].Name == 0 || tb.TimeTable[dayIndex*10+6].Name == 0 || tb.TimeTable[dayIndex*10+7].Name == 0 {
 		return true
 	}
 	return false
+}
+
+func (tb *Table) GradeTable() {
+
+	tb.Score = rand.Int31n(100)
 }
