@@ -20,7 +20,6 @@ func (g *Grader) Start(queue chan table.Table) {
 			if t.IsTableValid() {
 				g.Counters.IncrementValid()
 				t.GradeTable()
-				t.Score = 500
 				g.Counters.SetBestOption(t)
 			}
 			g.Counters.IncrementChecked()

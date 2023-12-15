@@ -9,7 +9,6 @@ import (
 	"flag"
 	log "github.com/sirupsen/logrus"
 	"os"
-	"runtime"
 	"strconv"
 	"sync"
 )
@@ -45,7 +44,7 @@ func GetArgs() (int, int, int) {
 	var debugLevel bool
 	var help bool
 
-	numberOfAvailableCPUs := runtime.NumCPU()
+	numberOfAvailableCPUs := 4 //runtime.NumCPU()
 
 	flag.IntVar(&timeLimit, "t", 180, "The time limit in seconds")
 	flag.IntVar(&timeBetweenProgressUpdates, "p", 10, "The time between progress updates in seconds")

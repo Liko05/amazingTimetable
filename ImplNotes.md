@@ -1,4 +1,3 @@
-# definition of subjects
 ## Impl notes
 - offset 100 for practical subjects
 - Uint8 0 - 255

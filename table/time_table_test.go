@@ -268,3 +268,20 @@ func TestTable_ProfileSubjectsFirstOrAfterPause(t *testing.T) {
 		t.Errorf("Expected %v, got %v", expected, output)
 	}
 }
+
+func TestTable_GradePresentClasses(t *testing.T) {
+	tb := Table{}
+	tb.CreateDefault()
+
+	output := [5]int{}
+
+	for i := 0; i < 5; i++ {
+		output[i] = int(tb.gradePresentClasses(i))
+	}
+
+	expected := [5]int{400, 200, 400, 500, 500}
+
+	if output != expected {
+		t.Errorf("Expected %v, got %v", expected, output)
+	}
+}

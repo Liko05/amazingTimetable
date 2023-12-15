@@ -343,6 +343,7 @@ func (tb *Table) GradeTable() {
 		tb.Score += tb.roomChanges(days)
 		tb.Score += tb.sameSubjectInDay(days)
 		tb.Score += tb.profileSubjectsFirstOrAfterPause(days)
+		tb.Score += tb.gradePresentClasses(days)
 
 	}
 	tb.Score += tb.isFridayShort()
@@ -449,5 +450,18 @@ func (tb *Table) profileSubjectsFirstOrAfterPause(dayIndex int) int32 {
 		}
 	}
 
+	return int32(finalScore)
+}
+
+// gradePresentClasses grades the present classes based on position
+func (tb *Table) gradePresentClasses(dayIndex int) int32 {
+	finalScore := 0
+	for hours := 0; hours < 10; hours++ {
+		if tb.TimeTable[dayIndex*10+hours].Name > 0 && hours < 6 {
+			finalScore += 100
+		} else if tb.TimeTable[dayIndex*10+hours].Name > 0 && hours >= 6 {
+			finalScore += -100
+		}
+	}
 	return int32(finalScore)
 }
