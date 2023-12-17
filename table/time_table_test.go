@@ -285,3 +285,13 @@ func TestTable_GradePresentClasses(t *testing.T) {
 		t.Errorf("Expected %v, got %v", expected, output)
 	}
 }
+
+func TestTable_WellBeingPoints(t *testing.T) {
+	tb := Table{}
+	tb.CreateDefault()
+	output := tb.WellBeingPoints()
+
+	if output != -800 {
+		t.Errorf("Expected -800, got %v", output)
+	}
+}

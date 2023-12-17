@@ -347,6 +347,7 @@ func (tb *Table) GradeTable() {
 
 	}
 	tb.Score += tb.isFridayShort()
+	tb.Score += tb.WellBeingPoints()
 }
 
 // firstFloorStart checks if the first class is on the first or ground floor
@@ -464,4 +465,68 @@ func (tb *Table) gradePresentClasses(dayIndex int) int32 {
 		}
 	}
 	return int32(finalScore)
+}
+
+// WellBeingPoints grades the day based on the well-being of the students
+func (tb *Table) WellBeingPoints() int32 {
+	var finalScore int32 = 0
+	dayIndex := 0
+	for i := 0; i < 5; i++ {
+		dayIndex = i * 10
+		finalScore += tb.dislikedTeachers(dayIndex)
+	}
+	finalScore += tb.dislikedClassRoomPoint()
+	finalScore += tb.likedTeachers()
+
+	return finalScore
+
+}
+
+// DislikedClassRoomPoint grades classes taking place in room 29
+func (tb *Table) dislikedClassRoomPoint() int32 {
+	finalScore := 0
+	for i := 0; i < 50; i++ {
+		if tb.TimeTable[i].Room == 3 {
+			finalScore += -100
+		}
+	}
+	return int32(finalScore)
+}
+
+// DislikedTeachers grades classes taking place with disliked teachers
+func (tb *Table) dislikedTeachers(dayIndex int) int32 {
+	var finalScore int32 = 0
+	hatedTeachers := []uint8{6, 3}
+	for i := dayIndex; i < dayIndex+9; i++ {
+		for _, teacher := range hatedTeachers {
+			if tb.TimeTable[i].Teacher == teacher {
+				finalScore -= 100
+			}
+		}
+	}
+	return finalScore
+}
+
+// LikedTeachers grades classes being consecutive with liked teachers
+func (tb *Table) likedTeachers() int32 {
+	likedTeacher := []uint8{9, 12, 7, 13}
+	var finalScore int32 = 0
+	dayIndex := 0
+
+	for _, teacher := range likedTeacher {
+		occurrences := map[int]bool{}
+		for i := 0; i < 5; i++ {
+			dayIndex = i * 10
+			for j := dayIndex; j <= dayIndex+9; j++ {
+				if tb.TimeTable[j].Teacher == teacher {
+					occurrences[dayIndex] = true
+					if dayIndex > 0 && occurrences[dayIndex-10] == true {
+						finalScore += 500
+					} else {
+					}
+				}
+			}
+		}
+	}
+	return finalScore
 }

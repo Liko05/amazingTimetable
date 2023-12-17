@@ -9,6 +9,7 @@ import (
 	"flag"
 	log "github.com/sirupsen/logrus"
 	"os"
+	"runtime"
 	"strconv"
 	"sync"
 )
@@ -29,6 +30,9 @@ func CreateVariablesForWorkers() (chan bool, *c.ThreadSafeCounters, *h.Hashes) {
 	counters.OriginalOption.CreateDefault()
 	counters.OriginalOption.GradeTable()
 
+	counters.BestOption.CreateDefault()
+	counters.BestOption.GradeTable()
+
 	var hashes = h.Hashes{
 		Hashes: make(map[uint32]bool, 200_000_000), // explanation on this is in README.md
 	}
@@ -44,7 +48,7 @@ func GetArgs() (int, int, int) {
 	var debugLevel bool
 	var help bool
 
-	numberOfAvailableCPUs := 4 //runtime.NumCPU()
+	numberOfAvailableCPUs := runtime.NumCPU()
 
 	flag.IntVar(&timeLimit, "t", 180, "The time limit in seconds")
 	flag.IntVar(&timeBetweenProgressUpdates, "p", 10, "The time between progress updates in seconds")

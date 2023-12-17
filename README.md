@@ -22,8 +22,10 @@
 - Documentation can be seen by running `godoc -http=:6060` in the root of the repository and then going to [localhost:6060/pkg/amazingTimetable](http://localhost:6060/pkg/amazingTimetable/)
 ## How to test
 - Run `go test` in the root of the repository
+- To see coverage of each package change directory to the package directory and run `go test -cover`
 ## External libraries
 - [logrus](https://github.com/sirupsen/logrus) for logging
+- [murmur3](https://github.com/spaolacci/murmur3)
 ## More info
 - Most of the logger code is from [here](https://stackoverflow.com/questions/48971780/how-to-change-the-format-of-log-output-in-logrus)
 ## Implementation notes
