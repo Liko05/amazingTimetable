@@ -1,17 +1,16 @@
 # Amazing time table generator
 ## How to use
-- Download the artifact from the [GitHub actions](https://github.com/Liko05/amazingTimetable/actions)
+- Download the artifact from the [GitHub actions](https://github.com/Liko05/amazingTimetable/actions) or build it yourself
 - Two ways to use this program:
     - Run the program with the command line arguments
     - Run the program without the command line arguments and follow the instructions
 - List of available command line arguments can be found by running the program with the argument `-h`
 ````
-  -d        Enable debug level logging
-  -g int    The number of generators (default 3)
-  -h        Show help
-  -p int    The time between progress updates in seconds (default 10)
-  -w int    The number of grader-worker pairs (default available threads / 2)
-  -t int    The time limit in seconds (default 180)
+  -d    Enable debug level logging
+  -h    Show help
+  -p int The time between progress updates in seconds (default 10)
+  -t int The time limit in seconds (default 180)
+  -w int Number of generator - grader pairs (default = logicalProcessors / 2)
   ````
 ## How to build
 - Install [Go](https://golang.org/)
@@ -25,7 +24,7 @@
 - To see coverage of each package change directory to the package directory and run `go test -cover`
 ## External libraries
 - [logrus](https://github.com/sirupsen/logrus) for logging
-- [murmur3](https://github.com/spaolacci/murmur3)
+- [murmur3](https://github.com/spaolacci/murmur3) for hashing purposes
 ## More info
 - Most of the logger code is from [here](https://stackoverflow.com/questions/48971780/how-to-change-the-format-of-log-output-in-logrus)
 ## Implementation notes

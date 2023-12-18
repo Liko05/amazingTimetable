@@ -12,6 +12,7 @@ import (
 	"runtime"
 	"strconv"
 	"sync"
+	"time"
 )
 
 // CreateVariablesForWorkers creates the variables for the workers
@@ -100,4 +101,7 @@ func main() {
 		log.Info("Default option: ")
 		println(utils.TableToString(counters.GetOriginalOption()))
 	}
+
+	time.Sleep(time.Second * 5)
+	os.Exit(0)
 }
