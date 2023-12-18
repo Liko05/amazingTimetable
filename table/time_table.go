@@ -26,7 +26,7 @@ func (tb *Table) CreateDefault() {
 	tb.Score = 0
 
 	tb.TimeTable[0] = Subject{
-		Name:    101,
+		Name:    1,
 		Teacher: 1,
 		Room:    1,
 		Floor:   4,
