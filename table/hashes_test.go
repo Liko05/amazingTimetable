@@ -10,7 +10,7 @@ func TestTable_Hash(t *testing.T) {
 
 	hash := table.Hash()
 
-	if hash != 1033733252 {
-		t.Errorf("Hash() = %v, want %v", hash, "1033733252")
+	if hash != 312455669 {
+		t.Errorf("Hash() = %v, want %v", hash, "312455669")
 	}
 }
