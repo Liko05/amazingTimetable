@@ -19,6 +19,10 @@ func (g *Generator) Start(que chan table.Table) {
 	defaultTimeTable := table.Table{}
 	defaultTimeTable.CreateDefault()
 	for {
+		if g.Counters.StopGeneration {
+			close(que)
+			return
+		}
 		defaultTimeTable.Shuffle()
 		if !g.Hashes.ContainsAndAdd(defaultTimeTable.Hash()) {
 			que <- defaultTimeTable

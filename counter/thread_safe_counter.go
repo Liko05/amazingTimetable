@@ -16,6 +16,14 @@ type ThreadSafeCounters struct {
 	OptionsBetterThanDefault uint64
 	BestOption               table.Table
 	OriginalOption           table.Table
+	StopGeneration           bool
+}
+
+// Stop stops the generation of new timetables
+func (l *ThreadSafeCounters) Stop() {
+	l.Mu.Lock()
+	l.StopGeneration = true
+	l.Mu.Unlock()
 }
 
 // IncrementGenerated increments the number of generated options

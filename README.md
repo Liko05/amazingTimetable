@@ -4,7 +4,7 @@
 - Two ways to use this program:
     - Run the program with the command line arguments
     - Run the program without the command line arguments and follow the instructions
-- List of available command line arguments can be found by running the program with the argument `-h`
+- List of available command line arguments can be found by running the program with the argument `-h` `-help` or just inputting invalid arguments
 ````
   -d    Enable debug level logging
   -h    Show help
@@ -25,6 +25,7 @@
 ## External libraries
 - [logrus](https://github.com/sirupsen/logrus) for logging
 - [murmur3](https://github.com/spaolacci/murmur3) for hashing purposes
+- [table](https://github.com/rodaine/table) for printing pretty tables
 ## More info
 - Most of the logger code is from [here](https://stackoverflow.com/questions/48971780/how-to-change-the-format-of-log-output-in-logrus)
 ## Implementation notes
@@ -32,6 +33,6 @@
     - The generator
     - The grader
     - The worker
-- Grader is being initialized together with the generator as a worker pair so they can communicate via exclusive channel
+- Grader is being initialized together with the generator as a worker pair, so they can communicate via exclusive channel
 - Map containing the hashes is being initialized with the size of 200_000_000 because resizing the map is expensive and in most cases GC gets overwhelmed and system starts to run out of memory
 - Number mappings of subjects, teachers and classes is defined in [ImplNotes.md](ImplNotes.md)

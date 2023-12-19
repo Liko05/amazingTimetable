@@ -16,7 +16,10 @@ type Grader struct {
 func (g *Grader) Start(queue chan table.Table) {
 	for {
 		select {
-		case t := <-queue:
+		case t, ok := <-queue:
+			if !ok {
+				return
+			}
 			if t.IsTableValid() {
 				g.Counters.IncrementValid()
 				t.GradeTable()

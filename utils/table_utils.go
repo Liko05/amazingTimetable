@@ -3,27 +3,41 @@ package utils
 
 import (
 	table "amazingTimetable/table"
-	"strconv"
+	"github.com/fatih/color"
+	tb "github.com/rodaine/table"
 )
 
 // TableToString returns a string representation of the table Definition of the string representation can be found in the Implementation notes
-func TableToString(t table.Table) string {
-	var result string
+func TableToString(t table.Table) {
 	var subjects = getMapOfSubjects()
 	var teachers = getMapOfTeachers()
 	var rooms = getMapOfRooms()
-	for i := 0; i < len(t.TimeTable); i++ {
-		currentSubject := t.TimeTable[i]
-		isPractical := currentSubject.Name > 100
-		if isPractical {
-			currentSubject.Name -= 100
+
+	headerFmt := color.New(color.BgHiCyan, color.Bold).SprintfFunc()
+	columnFmt := color.New(color.BgHiCyan, color.Bold).SprintfFunc()
+
+	days := []string{"Mon", "Tue", "Wed", "Thu", "Fri"}
+
+	tbl := tb.New("Day", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10")
+	tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt).WithPadding(5)
+
+	for i := 0; i < 5; i++ {
+		var subjectsInDay [10]string = [10]string{"", "", "", "", "", "", "", "", "", ""}
+		for j := 0; j < 10; j++ {
+			subjIndex := t.TimeTable[j+i*10].Name
+			if subjIndex > 100 {
+				subjIndex -= 100
+			}
+			if subjIndex == 0 {
+				subjectsInDay[j] = ""
+			} else {
+				subjectsInDay[j] = subjects[subjIndex] + " : " + teachers[t.TimeTable[j+i*10].Teacher] + " : " + rooms[t.TimeTable[j+i*10].Room]
+			}
 		}
-		result += "Subject: " + subjects[currentSubject.Name] + " Teacher: " + teachers[currentSubject.Teacher] + " Room: " + rooms[currentSubject.Room] + " Floor: " + strconv.Itoa(int(currentSubject.Floor)) + " Is Practical: " + strconv.FormatBool(isPractical) + "\n"
-		if i%10 == 9 {
-			result += "\n"
-		}
+		tbl.AddRow(days[i], subjectsInDay[0], subjectsInDay[1], subjectsInDay[2], subjectsInDay[3], subjectsInDay[4], subjectsInDay[5], subjectsInDay[6], subjectsInDay[7], subjectsInDay[8], subjectsInDay[9])
 	}
-	return result
+
+	tbl.Print()
 }
 
 // getMapOfSubjects returns a mapped subject ids to their names
